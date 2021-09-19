@@ -1,4 +1,5 @@
 require "xcommy/version"
+require "xcommy/entity"
 require "xcommy/enemy"
 require "xcommy/cover"
 require "xcommy/game"
