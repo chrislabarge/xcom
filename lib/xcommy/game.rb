@@ -1,8 +1,6 @@
 module Xcommy
   class Game
-    attr_reader :cover
-    attr_reader :enemies
-    attr_reader :players
+    attr_accessor :cover, :enemies, :players
 
     def initialize
       @cover = []
@@ -10,8 +8,13 @@ module Xcommy
       @players = []
     end
 
-    def render
-      true
+    def start
+      @display = Display.new self
+      render(:turn)
+    end
+
+    def render(screen)
+      puts @display.send(screen)
     end
 
     def firing_outcome(attempting_entity, receiving_entity)
@@ -43,6 +46,9 @@ module Xcommy
       # Test for this
       return 0 if distance == 1
 
+      # TODO: Need to also calculate things like receiving_entity armor
+      # Things NOT observable to player
+
       (distance * 5) + rand(-5..5)
     end
 
@@ -57,6 +63,12 @@ module Xcommy
         entity_firing.current_position,
         entity_receiving.current_position
       )
+
+      # Test for this
+      return 100 if distance == 1
+
+      # TODO: Need to also calculate things like receiving_entity behind cover
+      # Things observable to player
 
       (distance * 10) + rand(-5..5)
     end
