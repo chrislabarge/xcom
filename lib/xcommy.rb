@@ -5,6 +5,7 @@ require_relative "xcommy/cover"
 require_relative "xcommy/game"
 require_relative "xcommy/player"
 require_relative "xcommy/display"
+require_relative "xcommy/spot"
 
 module Xcommy
   class Error < StandardError; end
