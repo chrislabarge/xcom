@@ -1,3 +1,4 @@
+require 'io/console'
 module Xcommy
   class Game
     attr_accessor :cover, :enemies, :players
@@ -11,10 +12,41 @@ module Xcommy
     def start
       @display = Display.new self
       render(:turn)
+      screen = :turn
+      loop do
+        screen = accept_input(screen)
+        render(screen)
+      end
     end
 
     def render(screen)
       puts @display.send(screen)
+    end
+
+    # what accepting a current screen allows for is to keep track of state
+    # I think what I should be doing instead is the opposite. Just re-render
+    # by default and "refresh" what input is selected/entered by the user
+    def accept_input(current_screen)
+      case STDIN.getch
+      when "j"
+        @display.change_cursor_position(:down)
+        screen = current_screen
+      when "k"
+        @display.change_cursor_position(:up)
+        screen = current_screen
+      when "h"
+        @display.change_cursor_position(:left)
+        screen = current_screen
+      when "l"
+        @display.change_cursor_position(:right)
+        screen = current_screen
+      when "\r"
+        screen = @display.current_option.downcase.to_sym
+        @display.refresh
+      when "c"
+        exit
+      end
+      screen
     end
 
     def firing_outcome(attempting_entity, receiving_entity)
