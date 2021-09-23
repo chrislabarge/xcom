@@ -16,11 +16,21 @@ module Xcommy
       end
     end
 
-    def current_option
-      player_options[@cursor_index]
+    def current_selection
+      if @current_screen == :move
+        :spot
+      else
+        option = player_options[@cursor_index]
+        refresh!
+        option
+      end
     end
 
-    def refresh
+    def spot
+      screen(:spot)
+    end
+
+    def refresh!
       @cursor_index = 0
       @cursor_coords = [0, 0] #@game.current_player.postion
     end
@@ -29,19 +39,22 @@ module Xcommy
       screen(:turn)
     end
 
+    def cancel
+      screen(:turn)
+    end
+
     def move
-      @board[@cursor_coords[0]][@cursor_coords[1]] = :cursor
       screen(:move)
     end
 
-    def screen(type)
+    def screen(current)
       @content = []
-      @current_screen = type
+      @current_screen = current
       5.times do
         content << blank_line
       end
       content << boarder_horizontal
-      content << merge_components(playing_board(type), user_interface(type))
+      content << merge_components(playing_board, user_interface)
       content << blank_line
       content << boarder_horizontal
       content << blank_line
@@ -79,10 +92,11 @@ module Xcommy
     end
 
     def change_cursor_position(direction)
-      if @current_screen == :turn
-        update_cursor_index direction
-      else
+      case @current_screen
+      when :move
         update_cursor_coords direction
+      else
+        update_cursor_index direction
       end
     end
 
@@ -107,7 +121,28 @@ module Xcommy
       merger
     end
 
-    def playing_board(type)
+    def find_spot_type(spot_coords)
+      return @board[spot_coords[0]][spot_coords[1]] unless spot_cursor_visible?
+      if @cursor_coords[1] == spot_coords[1]
+        if @cursor_coords[0] == spot_coords[0] + 1
+          :top_cursor
+        elsif @cursor_coords[0] == spot_coords[0] - 1
+          :bottom_cursor
+        end
+      elsif @cursor_coords[0] == spot_coords[0]
+        if @cursor_coords[1] == spot_coords[1] + 1
+          :left_cursor
+        elsif @cursor_coords[1] == spot_coords[1] - 1
+          :right_cursor
+        end
+      end
+    end
+
+    def spot_cursor_visible?
+      @current_screen == :move || @current_screen == :spot
+    end
+
+    def playing_board
       rows = []
       rows << Array.new(@spot_width, "_____").join + "_"
       @spot_width.times do |outer_index|
@@ -115,10 +150,7 @@ module Xcommy
         bottom = []
 
         @spot_width.times do |inner_index|
-          puts outer_index
-          puts inner_index
-          spot_type = @board[outer_index][inner_index]
-          puts spot_type
+          spot_type = find_spot_type [outer_index, inner_index]
           top << Spot.for(:top, spot_type).to_s
           bottom << Spot.for(:bottom, spot_type).to_s
         end
@@ -129,7 +161,7 @@ module Xcommy
       rows
     end
 
-    def user_interface(type)
+    def user_interface
       interface = []
       interface << interface_top_border
       interface << interface_line
@@ -139,7 +171,8 @@ module Xcommy
       interface << interface_text_line("Health")
       interface << interface_text_line("100")
       interface << interface_divider
-      interface << interface_text_line(screen_title(type))
+      interface << interface_text_line(screen_title)
+      interface << interface_text_line("Turn")
       interface << interface_text_line("(1 of 2)")
 
       player_options.each do |option|
@@ -154,19 +187,26 @@ module Xcommy
       interface << interface_bottom_border
     end
 
-    def screen_title(type)
-      case type.to_sym
+    def screen_title
+      case @current_screen
       when :turn
-        "Take Turn"
+        "Choose Action"
       when :move
-        "Make Move"
+        "Select Spot"
+      when :spot
+        "Spot Selected"
       when :fire
         "Select"
       end
     end
 
     def player_options
-      ["Move", "Fire"]
+      case @current_screen
+      when :spot
+        ["Move To", "Cancel"]
+      else
+        ["Move", "Fire"]
+      end
     end
 
     def interface_top_border

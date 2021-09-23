@@ -41,8 +41,7 @@ module Xcommy
         @display.change_cursor_position(:right)
         screen = current_screen
       when "\r"
-        screen = @display.current_option.downcase.to_sym
-        @display.refresh
+        screen = @display.current_selection.downcase.to_sym
       when "c"
         exit
       end
