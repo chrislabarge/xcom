@@ -1,13 +1,11 @@
 module Xcommy
   class Enemy < Entity
-    attr_reader :current_destination
-
     def take_turn!
       clear_turn_cache if @turns.count == 2
 
       if first_turn? && exposed?
         set_current_destination
-        move_to!(next_spot)
+        move_to!(next_position)
       else
         fire_at!(best_player_to_hit)
       end
@@ -40,21 +38,6 @@ module Xcommy
       best_spot = closest_cover.position
       best_spot[0] -= 1
       best_spot
-    end
-
-    def next_spot
-      spot = @current_position
-
-      if @current_position[1] < @current_destination[1]
-        spot[1] += 1
-      elsif @current_position[1] > @current_destination[1]
-        spot[1] -= 1
-      elsif @current_position[0] < @current_destination[0]
-        spot[0] += 1
-      elsif @current_position[0] > @current_destination[0]
-        spot[0] -= 1
-      end
-      spot
     end
 
     def exposed?

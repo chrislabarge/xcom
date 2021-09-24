@@ -7,6 +7,13 @@ module Xcommy
       }
     end
 
+    def self.player_1
+      {
+        top: "| P1 ",
+        bottom: "|____",
+      }
+    end
+
     def self.full_wall
       {
         top: "|ZZZZ",

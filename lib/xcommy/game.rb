@@ -1,7 +1,7 @@
 require 'io/console'
 module Xcommy
   class Game
-    attr_accessor :cover, :enemies, :players
+    attr_accessor :cover, :enemies, :players, :current_player
 
     def initialize
       @cover = []
@@ -11,6 +11,7 @@ module Xcommy
 
     def start
       @display = Display.new self
+      @current_player = players.last
       render(:turn)
       screen = :turn
       loop do
@@ -20,7 +21,7 @@ module Xcommy
     end
 
     def render(screen)
-      puts @display.send(screen)
+      @display.render(screen)
     end
 
     # what accepting a current screen allows for is to keep track of state

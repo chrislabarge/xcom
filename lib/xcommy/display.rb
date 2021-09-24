@@ -10,18 +10,40 @@ module Xcommy
       @cursor_index = 0
       @cursor_coords = nil
       @current_screen = nil
-      @board = {}
+      refresh_board!
+    end
+
+    def refresh_board!
+      @board ||= {}
       @spot_width.times do |index|
         @board[index] = {}
+      end
+      build_board!
+    end
+
+    def render(screen_sym)
+      if cinematic_screens.include?(screen_sym)
+        send(screen_sym)
+        @game.current_player.completed_turn!
+        render(:turn)
+      else
+        show! send(screen_sym)
+      end
+    end
+
+    def build_board!
+      @game.players.each_with_index do |player, index|
+        player_coords = player.current_position
+        @board[player_coords[0]][player_coords[1]] = "player_#{index + 1}"
       end
     end
 
     def current_selection
-      if @current_screen == :move
+      case @current_screen
+      when :move
         :spot
-      else
-        option = player_options[@cursor_index]
-        refresh!
+      else option = player_options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
+        refresh! unless option == :move_to
         option
       end
     end
@@ -33,6 +55,7 @@ module Xcommy
     def refresh!
       @cursor_index = 0
       @cursor_coords = [0, 0] #@game.current_player.postion
+      refresh_board!
     end
 
     def turn
@@ -45,6 +68,20 @@ module Xcommy
 
     def move
       screen(:move)
+    end
+
+    def move_to
+      @game.current_player.current_destination = @cursor_coords
+      while !@game.current_player.reached_destination?
+        @game.current_player.move_to_next_position!
+        refresh_board!
+        show! screen(:move_to)
+        sleep(0.5)
+      end
+    end
+
+    def show!(content)
+      puts content
     end
 
     def screen(current)
@@ -78,7 +115,6 @@ module Xcommy
     end
 
     def update_cursor_coords(direction)
-      @board[@cursor_coords[0]][@cursor_coords[1]] = nil
       case direction
       when :up
         @cursor_coords[0] -= 1 unless @cursor_coords[0] == 0
@@ -122,7 +158,14 @@ module Xcommy
     end
 
     def find_spot_type(spot_coords)
-      return @board[spot_coords[0]][spot_coords[1]] unless spot_cursor_visible?
+      board_spot = @board[spot_coords[0]][spot_coords[1]]
+
+      return board_spot unless spot_cursor_visible?
+
+      cursor_spot_type(spot_coords) || board_spot
+    end
+
+    def cursor_spot_type(spot_coords)
       if @cursor_coords[1] == spot_coords[1]
         if @cursor_coords[0] == spot_coords[0] + 1
           :top_cursor
@@ -161,6 +204,20 @@ module Xcommy
       rows
     end
 
+    def turn_display
+      turns_left = @game.current_player.turns_left
+
+      prefix =
+        if turns_left == 2
+          1
+        elsif turns_left == 1
+          2
+        else
+          0
+        end
+      "(#{prefix} of 2)"
+    end
+
     def user_interface
       interface = []
       interface << interface_top_border
@@ -173,7 +230,7 @@ module Xcommy
       interface << interface_divider
       interface << interface_text_line(screen_title)
       interface << interface_text_line("Turn")
-      interface << interface_text_line("(1 of 2)")
+      interface << interface_text_line(turn_display)
 
       player_options.each do |option|
         interface << interface_divider
@@ -181,18 +238,26 @@ module Xcommy
       end
 
       interface << interface_divider
-      5.times do
+
+      number_of_empty_interface_lines.times do
         interface << interface_line
       end
+
       interface << interface_bottom_border
+    end
+
+    def number_of_empty_interface_lines
+      (8 - (player_options.count * 2))
     end
 
     def screen_title
       case @current_screen
       when :turn
         "Choose Action"
+      when :move_to
+        "Moving..."
       when :move
-        "Select Spot"
+        "Selecting..."
       when :spot
         "Spot Selected"
       when :fire
@@ -204,6 +269,10 @@ module Xcommy
       case @current_screen
       when :spot
         ["Move To", "Cancel"]
+      when :move_to
+        ["Move To"]
+      when :move
+        ["Select Spot"]
       else
         ["Move", "Fire"]
       end
@@ -256,6 +325,10 @@ module Xcommy
 
     def boarder_horizontal
       Array.new(85, "=").join
+    end
+
+    def cinematic_screens
+      [:move_to]
     end
   end
 end

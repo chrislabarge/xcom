@@ -1,24 +1,30 @@
 module Xcommy
   class Entity
-    attr_accessor :health
-    attr_reader :current_position
+    attr_accessor :health, :current_destination, :current_position, :turns_left
 
     def initialize(game, starting_position)
       @game = game
       @health = 100
       @current_position = starting_position
+      @turns_left = 2
       clear_turn_cache
     end
 
     def fire_at!(entity)
-      @turns << :fire_at!
       @game.render(@game.firing_outcome(self, entity))
     end
 
-    def move_to!(spot)
-      @current_position = spot
-      @turns << :move_to!
-      @game.render(:move)
+    def move_to!(position)
+      @current_position = position
+      #@game.render(:move)
+    end
+
+    def completed_turn!
+      @turns_left -= 1
+    end
+
+    def move_to_next_position!
+      move_to! next_position
     end
 
     def closest_cover
@@ -74,6 +80,26 @@ module Xcommy
 
     def first_turn?
       @turns.count == 0
+    end
+
+    def reached_destination?
+      @current_position == @current_destination
+    end
+
+    def next_position
+      position = current_position
+
+      if current_position[1] < current_destination[1]
+        position[1] += 1
+      elsif current_position[1] > current_destination[1]
+        position[1] -= 1
+      elsif current_position[0] < current_destination[0]
+        position[0] += 1
+      elsif current_position[0] > current_destination[0]
+        position[0] -= 1
+      end
+
+      position
     end
   end
 end
