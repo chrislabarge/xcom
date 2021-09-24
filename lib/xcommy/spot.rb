@@ -7,6 +7,13 @@ module Xcommy
       }
     end
 
+    def self.enemy_1
+      {
+        top: "| E1 ",
+        bottom: "|____",
+      }
+    end
+
     def self.player_1
       {
         top: "| P1 ",

@@ -1,10 +1,11 @@
 module Xcommy
   class Cover
-    attr_reader :position
+    attr_reader :position, :type
 
-    def initialize(game, spot)
+    def initialize(game, spot, type)
       @game = game
       @position = spot
+      @type = type.to_sym
     end
 
     def in_between?(spot1, spot2)
@@ -15,13 +16,13 @@ module Xcommy
       false
     end
 
-    def inline_with?(spot1, spot2, type)
-      index = (type.to_sym == :vertically ? 1 : 0)
+    def inline_with?(spot1, spot2, alignment_type)
+      index = (alignment_type.to_sym == :vertically ? 1 : 0)
       position[index] == spot1[index] && position[index] == spot2[index]
     end
 
-    def between?(spot1, spot2, type)
-      index = (type.to_sym == :vertically ? 0 : 1)
+    def between?(spot1, spot2, alignment_type)
+      index = (alignment_type.to_sym == :vertically ? 0 : 1)
       (spot1[index] < position[index] && spot2[index] > position[index] ||
          spot1[index] > position[index] && spot2[index] < position[index])
     end

@@ -12,5 +12,9 @@ module Xcommy
   game = Game.new
   game.enemies = [Enemy.new(game, [0, 0])]
   game.players = [Player.new(game, [9, 0])]
+  game.cover = [
+    Cover.new(game, [8, rand(0..9)],:full_wall),
+    Cover.new(game, [1, rand(0..9)], :full_wall)
+  ]
   game.start
 end

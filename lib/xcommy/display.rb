@@ -1,6 +1,6 @@
 module Xcommy
   class Display
-    attr_reader :content
+    attr_reader :content, :current_screen
     attr_reader :game
 
     def initialize(game)
@@ -10,6 +10,7 @@ module Xcommy
       @cursor_index = 0
       @cursor_coords = nil
       @current_screen = nil
+      refresh_alert_message!
       refresh_board!
     end
 
@@ -36,15 +37,37 @@ module Xcommy
         player_coords = player.current_position
         @board[player_coords[0]][player_coords[1]] = "player_#{index + 1}"
       end
+      @game.cover.each do |cover|
+        cover_coords = cover.position
+        @board[cover_coords[0]][cover_coords[1]] = cover.type
+      end
+      @game.enemies.each_with_index do |enemy, index|
+        enemy_coords = enemy.current_position
+        @board[enemy_coords[0]][enemy_coords[1]] = "enemy_#{index + 1}"
+      end
     end
 
     def current_selection
       case @current_screen
       when :move
-        :spot
+        refresh_alert_message!
+        spot_screen
       else option = player_options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
         refresh! unless option == :move_to
         option
+      end
+    end
+
+    def refresh_alert_message!
+      @alert_message = nil
+    end
+
+    def spot_screen
+      if @board[@cursor_coords[0]][@cursor_coords[1]].nil?
+        :spot
+      else
+        @alert_message = "Spot not available"
+        :move
       end
     end
 
@@ -54,7 +77,7 @@ module Xcommy
 
     def refresh!
       @cursor_index = 0
-      @cursor_coords = [0, 0] #@game.current_player.postion
+      @cursor_coords = [4, 5] #@game.current_player.postion
       refresh_board!
     end
 
@@ -237,6 +260,10 @@ module Xcommy
         interface << interface_text_line(option, cursor: player_options[@cursor_index] == option)
       end
 
+      unless @alert_message.nil?
+        interface << interface_text_line(@alert_message)
+      end
+
       interface << interface_divider
 
       number_of_empty_interface_lines.times do
@@ -247,7 +274,9 @@ module Xcommy
     end
 
     def number_of_empty_interface_lines
-      (8 - (player_options.count * 2))
+      count = (8 - (player_options.count * 2))
+      count -= 1 unless @alert_message.nil?
+      count
     end
 
     def screen_title
