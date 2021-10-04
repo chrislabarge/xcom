@@ -34,6 +34,7 @@ module Xcommy
 
     def build_board!
       @game.players.each_with_index do |player, index|
+        next unless player.visible?
         player_coords = player.current_position
         @board[player_coords[0]][player_coords[1]] = "player_#{index + 1}"
       end
@@ -42,8 +43,14 @@ module Xcommy
         @board[cover_coords[0]][cover_coords[1]] = cover.type
       end
       @game.enemies.each_with_index do |enemy, index|
+        next unless enemy.visible?
         enemy_coords = enemy.current_position
         @board[enemy_coords[0]][enemy_coords[1]] = "enemy_#{index + 1}"
+      end
+
+      unless @game.fired_shot.nil? || !@game.fired_shot.visible?
+        fired_shot_coords = @game.fired_shot.current_position
+        @board[fired_shot_coords[0]][fired_shot_coords[1]] = :fired_shot
       end
     end
 
@@ -53,7 +60,7 @@ module Xcommy
         refresh_alert_message!
         spot_screen
       else option = player_options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
-        refresh! unless option == :move_to
+        refresh! unless cinematic_screens.include?(option)
         option
       end
     end
@@ -81,6 +88,43 @@ module Xcommy
       refresh_board!
     end
 
+    def enemy_1
+      @game.fired_shot = FiredShot.new(
+        @game,
+        @game.current_player.current_position,
+        @game.enemies[0],
+      )
+
+      while !@game.fired_shot.reached_destination?
+        @game.fired_shot.move_to_next_position!
+        refresh_board!
+        show! screen(:enemy_1)
+        sleep(0.5)
+      end
+
+      @game.fired_shot.hide!
+      refresh_board!
+      show! screen(:enemy_1)
+      sleep(0.5)
+
+      hit
+    end
+
+    def hit
+      2.times do
+        @game.fired_shot.at_player.hide!
+        refresh_board!
+        show! screen(:hit)
+        sleep(0.5)
+        @game.fired_shot.at_player.show!
+        refresh_board!
+        show! screen(:hit)
+        sleep(0.35)
+      end
+
+      @game.fired_shot = nil
+    end
+
     def turn
       screen(:turn)
     end
@@ -91,6 +135,10 @@ module Xcommy
 
     def move
       screen(:move)
+    end
+
+    def fire
+      screen(:fire)
     end
 
     def move_to
@@ -154,6 +202,8 @@ module Xcommy
       case @current_screen
       when :move
         update_cursor_coords direction
+      when :fire
+        update_cursor_index direction
       else
         update_cursor_index direction
       end
@@ -290,7 +340,11 @@ module Xcommy
       when :spot
         "Spot Selected"
       when :fire
-        "Select"
+        "Select Enemy"
+      when :enemy_1
+        "Firing"
+      when :hit
+        "Hit!!!"
       end
     end
 
@@ -302,6 +356,18 @@ module Xcommy
         ["Move To"]
       when :move
         ["Select Spot"]
+      when :fire
+        options = []
+        @game.enemies.each_with_index do |enemy, index|
+          options << "Enemy #{index + 1}"
+        end
+
+        options << "Cancel"
+      when :enemy_1
+        ["Enemy 1"]
+      when :hit
+        # TODO - this should come dynamically from the @game.fired_shot model
+        ["Enemy 1"]
       else
         ["Move", "Fire"]
       end
@@ -357,7 +423,7 @@ module Xcommy
     end
 
     def cinematic_screens
-      [:move_to]
+      [:move_to, :enemy_1, :hit]
     end
   end
 end

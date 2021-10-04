@@ -21,6 +21,13 @@ module Xcommy
       }
     end
 
+    def self.fired_shot
+      {
+        top: "| ** ",
+        bottom: "|____",
+      }
+    end
+
     def self.full_wall
       {
         top: "|ZZZZ",
