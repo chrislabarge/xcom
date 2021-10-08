@@ -14,6 +14,20 @@ module Xcommy
       }
     end
 
+    def self.damage_10
+      {
+        top: "|-10 ",
+        bottom: "|____",
+      }
+    end
+
+    def self.miss
+      {
+        top: "|miss",
+        bottom: "|____",
+      }
+    end
+
     def self.player_1
       {
         top: "| P1 ",

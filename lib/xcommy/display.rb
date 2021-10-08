@@ -23,7 +23,7 @@ module Xcommy
     end
 
     def render(screen_sym)
-      if cinematic_screens.include?(screen_sym)
+      if cinematic_screens.include?(screen_sym.to_sym)
         send(screen_sym)
         @game.current_player.completed_turn!
         render(:turn)
@@ -38,14 +38,24 @@ module Xcommy
         player_coords = player.current_position
         @board[player_coords[0]][player_coords[1]] = "player_#{index + 1}"
       end
+
       @game.cover.each do |cover|
         cover_coords = cover.position
         @board[cover_coords[0]][cover_coords[1]] = cover.type
       end
+
       @game.enemies.each_with_index do |enemy, index|
         next unless enemy.visible?
         enemy_coords = enemy.current_position
-        @board[enemy_coords[0]][enemy_coords[1]] = "enemy_#{index + 1}"
+
+        @board[enemy_coords[0]][enemy_coords[1]] =
+          if enemy.damaged?
+            "damage_#{enemy.damage_amount}"
+          elsif enemy.missed?
+            "miss"
+          else
+            "enemy_#{index + 1}"
+          end
       end
 
       unless @game.fired_shot.nil? || !@game.fired_shot.visible?
@@ -107,22 +117,60 @@ module Xcommy
       show! screen(:enemy_1)
       sleep(0.5)
 
-      hit
+      send(@game.fired_shot.result)
+      @game.fired_shot = nil
+    end
+
+    def miss
+      render_blinking_player @game.fired_shot.at_player, :miss
+      render_player_message @game.fired_shot.at_player, "Miss"
+      render_player_message @game.fired_shot.at_player, "Miss"
+      render_blinking_player @game.fired_shot.at_player, :miss
     end
 
     def hit
-      2.times do
-        @game.fired_shot.at_player.hide!
-        refresh_board!
-        show! screen(:hit)
-        sleep(0.5)
-        @game.fired_shot.at_player.show!
-        refresh_board!
-        show! screen(:hit)
-        sleep(0.35)
-      end
+      render_blinking_player @game.fired_shot.at_player, :hit
+      render_player_damage @game.fired_shot.at_player, 10
+      render_player_damage @game.fired_shot.at_player, 10
+      render_blinking_player @game.fired_shot.at_player, :hit
+    end
 
-      @game.fired_shot = nil
+    def render_player_message(player, damage)
+      player.miss!
+      refresh_board!
+      show! screen(:miss)
+      sleep(0.35)
+
+      player.show!
+      refresh_board!
+      show! screen(:miss)
+      sleep(0.35)
+    end
+
+    def render_player_damage(player, damage)
+      player.damage!(damage)
+      refresh_board!
+      show! screen(:hit)
+      sleep(0.35)
+
+      player.reset_damage!
+
+      player.show!
+      refresh_board!
+      show! screen(:hit)
+      sleep(0.35)
+    end
+
+    def render_blinking_player(player, screen_type)
+      player.hide!
+      refresh_board!
+      show! screen(screen_type)
+      sleep(0.35)
+
+      player.show!
+      refresh_board!
+      show! screen(screen_type)
+      sleep(0.35)
     end
 
     def turn
@@ -294,14 +342,18 @@ module Xcommy
     def user_interface
       interface = []
       interface << interface_top_border
+
       interface << interface_line
       interface << interface_text_line("Player 1")
       interface << interface_line
       interface << interface_divider
+
       interface << interface_text_line("Health")
       interface << interface_text_line("100")
       interface << interface_divider
+
       interface << interface_text_line(screen_title)
+
       interface << interface_text_line("Turn")
       interface << interface_text_line(turn_display)
 
@@ -342,9 +394,11 @@ module Xcommy
       when :fire
         "Select Enemy"
       when :enemy_1
-        "Firing"
+        "Firing..."
       when :hit
-        "Hit!!!"
+        "Hit!"
+      when :miss
+        "Miss!"
       end
     end
 
@@ -359,18 +413,25 @@ module Xcommy
       when :fire
         options = []
         @game.enemies.each_with_index do |enemy, index|
-          options << "Enemy #{index + 1}"
+          options << enemy_option_text
         end
 
         options << "Cancel"
       when :enemy_1
-        ["Enemy 1"]
+        [enemy_option_text]
       when :hit
         # TODO - this should come dynamically from the @game.fired_shot model
-        ["Enemy 1"]
+        [enemy_option_text]
+      when :miss
+        # TODO - this should come dynamically from the @game.fired_shot model
+        [enemy_option_text]
       else
         ["Move", "Fire"]
       end
+    end
+
+    def enemy_option_text
+      "Enemy 1 (#{@game.enemies[0].health})"
     end
 
     def interface_top_border
@@ -423,7 +484,7 @@ module Xcommy
     end
 
     def cinematic_screens
-      [:move_to, :enemy_1, :hit]
+      [:move_to, :enemy_1, :hit, :miss]
     end
   end
 end

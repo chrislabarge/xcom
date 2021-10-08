@@ -9,5 +9,9 @@ module Xcommy
       @current_destination = duplicate_coords at_player.current_position
       show!
     end
+
+    def result
+      @game.current_player.fire_at! @at_player
+    end
   end
 end

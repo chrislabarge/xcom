@@ -46,7 +46,7 @@ module Xcommy
           expect(player.health).to be < 100
         end
 
-        it 'renders the result' do
+        it "renders the result" do
           expect(game).to have_received(:render).with(:hit)
         end
       end
@@ -61,7 +61,7 @@ module Xcommy
           expect(player.health).to eq 100
         end
 
-        it 'renders the result' do
+        it "renders the result" do
           expect(game).to have_received(:render).with(:miss)
         end
       end
@@ -75,7 +75,7 @@ module Xcommy
           allow(game).to receive(:render)
           allow(game).to receive(:players) { [player] }
         end
-        context 'when cover exist' do
+        context "when cover exist" do
           before do
             allow(game).to receive(:cover) { [Cover.new(game, [4, 2])] }
             subject.take_turn!
@@ -94,7 +94,7 @@ module Xcommy
           end
         end
 
-        context 'when cover does NOT exist' do
+        context "when cover does NOT exist" do
           before do
             allow(subject).to receive(:fire_at!).with(player)
           end

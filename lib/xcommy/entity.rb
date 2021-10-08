@@ -1,6 +1,6 @@
 module Xcommy
   class Entity
-    attr_accessor :health, :current_destination, :current_position, :turns_left, :is_visible
+    attr_accessor :health, :current_destination, :current_position, :turns_left, :is_visible, :damage_amount, :miss
 
     def duplicate_coords(coords)
       [coords[0], coords[1]]
@@ -9,6 +9,7 @@ module Xcommy
     def initialize(game, starting_position)
       @game = game
       @health = 100
+      @damage_amount = 0
       @current_position = starting_position
       @turns_left = 2
       clear_turn_cache
@@ -27,8 +28,28 @@ module Xcommy
       @is_visible == true
     end
 
+    def damage!(amount)
+      @damage_amount = amount
+    end
+
+    def miss!
+      @miss = true
+    end
+
+    def missed?
+      @miss == true
+    end
+
+    def damaged?
+      @damage_amount.positive?
+    end
+
+    def reset_damage!
+      @damage_amount = 0
+    end
+
     def fire_at!(entity)
-      @game.render(@game.firing_outcome(self, entity))
+      @game.firing_outcome(self, entity)
     end
 
     def move_to!(position)

@@ -20,7 +20,9 @@ module Xcommy
     end
 
     def render(screen)
-      @display.render(screen)
+      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['enemy_1'])
+      parsed_text = spell_checker.correct(screen).first || screen
+      @display.render(parsed_text)
     end
 
     # what accepting a current screen allows for is to keep track of state
