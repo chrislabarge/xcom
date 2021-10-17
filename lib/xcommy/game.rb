@@ -10,9 +10,13 @@ module Xcommy
       @fired_shot = nil
     end
 
+    def current_screen
+      @display.current_screen
+    end
+
     def start
       @display = Display.new self
-      @current_player = players.last
+      @current_player = players.first
       render(:turn)
 
       unless Setup.testing?
@@ -20,6 +24,14 @@ module Xcommy
           render accept_input
         end
       end
+    end
+
+    def new_fired_shot(at:)
+      self.fired_shot = FiredShot.new(
+        self,
+        current_player.current_position,
+        at,
+      )
     end
 
     def render(screen)

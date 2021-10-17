@@ -1,5 +1,9 @@
 module Xcommy
   class Display
+    LONG_SLEEP = 0.5
+    SHORT_SLEEP = 0.35
+    TESTING_SLEEP = 0.05
+
     attr_reader :content, :current_screen
     attr_reader :game
 
@@ -99,23 +103,19 @@ module Xcommy
     end
 
     def enemy_1
-      @game.fired_shot = FiredShot.new(
-        @game,
-        @game.current_player.current_position,
-        @game.enemies[0],
-      )
+      @game.new_fired_shot(at: @game.enemies.first)
 
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
         refresh_board!
         show! screen(:enemy_1)
-        sleep(0.5)
+        long_sleep
       end
 
       @game.fired_shot.hide!
       refresh_board!
       show! screen(:enemy_1)
-      sleep(0.5)
+      long_sleep
 
       send(@game.fired_shot.result)
       @game.fired_shot = nil
@@ -132,6 +132,7 @@ module Xcommy
       render_blinking_player @game.fired_shot.at_player, :hit
       render_player_damage @game.fired_shot.at_player, 10
       render_player_damage @game.fired_shot.at_player, 10
+      @game.fired_shot.at_player.health -= 10
       render_blinking_player @game.fired_shot.at_player, :hit
     end
 
@@ -139,38 +140,38 @@ module Xcommy
       player.miss!
       refresh_board!
       show! screen(:miss)
-      sleep(0.35)
+      short_sleep
 
       player.show!
       refresh_board!
       show! screen(:miss)
-      sleep(0.35)
+      short_sleep
     end
 
     def render_player_damage(player, damage)
       player.damage!(damage)
       refresh_board!
       show! screen(:hit)
-      sleep(0.35)
+      short_sleep
 
       player.reset_damage!
 
       player.show!
       refresh_board!
       show! screen(:hit)
-      sleep(0.35)
+      short_sleep
     end
 
     def render_blinking_player(player, screen_type)
       player.hide!
       refresh_board!
       show! screen(screen_type)
-      sleep(0.35)
+      short_sleep
 
       player.show!
       refresh_board!
       show! screen(screen_type)
-      sleep(0.35)
+      short_sleep
     end
 
     def turn
@@ -195,7 +196,7 @@ module Xcommy
         @game.current_player.move_to_next_position!
         refresh_board!
         show! screen(:move_to)
-        sleep(0.5)
+        long_sleep
       end
     end
 
@@ -485,6 +486,26 @@ module Xcommy
 
     def cinematic_screens
       [:move_to, :enemy_1, :hit, :miss]
+    end
+
+    def long_sleep
+      sleep(
+        if Setup.testing?
+          TESTING_SLEEP
+        else
+          LONG_SLEEP
+        end
+      )
+    end
+
+    def short_sleep
+      sleep(
+        if Setup.testing?
+          TESTING_SLEEP
+        else
+          SHORT_SLEEP
+        end
+      )
     end
   end
 end
