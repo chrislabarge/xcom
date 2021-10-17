@@ -6,16 +6,10 @@ require_relative "xcommy/enemy"
 require_relative "xcommy/fired_shot"
 require_relative "xcommy/cover"
 require_relative "xcommy/display"
+require_relative "xcommy/setup"
 require_relative "xcommy/spot"
 
 module Xcommy
   class Error < StandardError; end
-  game = Game.new
-  game.enemies = [Enemy.new(game, [0, 0])]
-  game.players = [Player.new(game, [9, 0])]
-  game.cover = [
-    Cover.new(game, [8, rand(0..9)],:full_wall),
-    Cover.new(game, [1, rand(0..9)], :full_wall)
-  ]
-  game.start
+  Setup.new_game.start unless Setup.testing?
 end
