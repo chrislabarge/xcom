@@ -7,7 +7,8 @@ module Xcommy
       :current_player,
       :fired_shot,
       :current_turns,
-      :board
+      :board,
+      :display
 
     def initialize
       @cover = []

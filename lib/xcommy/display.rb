@@ -4,6 +4,7 @@ module Xcommy
     SHORT_SLEEP = 0.35
     TESTING_SLEEP = 0.0
 
+    attr_accessor :cursor_index
     attr_reader :content, :current_screen
     attr_reader :game
 
@@ -11,7 +12,6 @@ module Xcommy
       @content = []
       @game = game
       @cursor_index = 0
-      @cursor_coords = nil
       @current_screen = nil
       refresh_alert_message!
       @board = @game.board
@@ -33,7 +33,7 @@ module Xcommy
         refresh_alert_message!
         spot_screen
       else option = player_options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
-        refresh! unless cinematic_screens.include?(option)
+        @board.cursor_select! unless cinematic_screens.include?(option)
         option
       end
     end
@@ -43,7 +43,7 @@ module Xcommy
     end
 
     def spot_screen
-      if @board.data[@cursor_coords[0]][@cursor_coords[1]].nil?
+      if @board.cursor_spot.nil?
         :spot
       else
         @alert_message = "Spot not available"
@@ -53,12 +53,6 @@ module Xcommy
 
     def spot
       screen(:spot)
-    end
-
-    def refresh!
-      @cursor_index = 0
-      @cursor_coords = [4, 5] #@game.current_player.postion
-      @board.refresh!
     end
 
     def enemy_1
@@ -150,7 +144,7 @@ module Xcommy
     end
 
     def move_to
-      @game.current_player.current_destination = @cursor_coords
+      @game.current_player.current_destination = @board.cursor_coords
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
         @board.refresh!
@@ -170,11 +164,23 @@ module Xcommy
         content << blank_line
       end
       content << boarder_horizontal
-      content << merge_components(playing_board, user_interface)
+      content << merge_components(@board.render, user_interface)
       content << blank_line
       content << boarder_horizontal
       content << blank_line
       content
+    end
+
+
+    def change_cursor_position(direction)
+      case @game.display.current_screen
+      when :move
+        @board.update_cursor_coords direction
+      when :fire
+        update_cursor_index direction
+      else
+        update_cursor_index direction
+      end
     end
 
     def update_cursor_index(direction)
@@ -190,30 +196,6 @@ module Xcommy
         else
           @cursor_index += 1
         end
-      end
-    end
-
-    def update_cursor_coords(direction)
-      case direction
-      when :up
-        @cursor_coords[0] -= 1 unless @cursor_coords[0] == 0
-      when :down
-        @cursor_coords[0] += 1 unless @cursor_coords[0] == (Board.spot_length - 1)
-      when :left
-        @cursor_coords[1] -= 1 unless @cursor_coords[1] == 0
-      when :right
-        @cursor_coords[1] += 1 unless @cursor_coords[1] == (Board.spot_length - 1)
-      end
-    end
-
-    def change_cursor_position(direction)
-      case @current_screen
-      when :move
-        update_cursor_coords direction
-      when :fire
-        update_cursor_index direction
-      else
-        update_cursor_index direction
       end
     end
 
@@ -238,51 +220,8 @@ module Xcommy
       merger
     end
 
-    def find_spot_type(spot_coords)
-      board_spot = @board.data[spot_coords[0]][spot_coords[1]]
-
-      return board_spot unless spot_cursor_visible?
-
-      cursor_spot_type(spot_coords) || board_spot
-    end
-
-    def cursor_spot_type(spot_coords)
-      if @cursor_coords[1] == spot_coords[1]
-        if @cursor_coords[0] == spot_coords[0] + 1
-          :top_cursor
-        elsif @cursor_coords[0] == spot_coords[0] - 1
-          :bottom_cursor
-        end
-      elsif @cursor_coords[0] == spot_coords[0]
-        if @cursor_coords[1] == spot_coords[1] + 1
-          :left_cursor
-        elsif @cursor_coords[1] == spot_coords[1] - 1
-          :right_cursor
-        end
-      end
-    end
-
     def spot_cursor_visible?
       @current_screen == :move || @current_screen == :spot
-    end
-
-    def playing_board
-      rows = []
-      rows << Array.new(Board.spot_length, "_____").join + "_"
-      Board.spot_length.times do |outer_index|
-        top = []
-        bottom = []
-
-        Board.spot_length.times do |inner_index|
-          spot_type = find_spot_type [outer_index, inner_index]
-          top << Spot.for(:top, spot_type).to_s
-          bottom << Spot.for(:bottom, spot_type).to_s
-        end
-
-        rows << top.join + "|"
-        rows << bottom.join + "|"
-      end
-      rows
     end
 
     def turn_display

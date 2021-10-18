@@ -53,7 +53,6 @@ module Xcommy
 
     def move_to!(position)
       @current_position = position
-      #@game.render(:move)
     end
 
     def move_to_next_position!
