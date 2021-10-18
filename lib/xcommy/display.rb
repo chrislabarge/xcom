@@ -2,7 +2,7 @@ module Xcommy
   class Display
     LONG_SLEEP = 0.5
     SHORT_SLEEP = 0.35
-    TESTING_SLEEP = 0.05
+    TESTING_SLEEP = 0.0
 
     attr_reader :content, :current_screen
     attr_reader :game
@@ -10,61 +10,20 @@ module Xcommy
     def initialize(game)
       @content = []
       @game = game
-      @spot_width = 10
       @cursor_index = 0
       @cursor_coords = nil
       @current_screen = nil
       refresh_alert_message!
-      refresh_board!
-    end
-
-    def refresh_board!
-      @board ||= {}
-      @spot_width.times do |index|
-        @board[index] = {}
-      end
-      build_board!
+      @board = @game.board
     end
 
     def render(screen_sym)
       if cinematic_screens.include?(screen_sym.to_sym)
         send(screen_sym)
-        @game.current_player.completed_turn!
+        @game.current_turns << screen_sym
         render(:turn)
       else
         show! send(screen_sym)
-      end
-    end
-
-    def build_board!
-      @game.players.each_with_index do |player, index|
-        next unless player.visible?
-        player_coords = player.current_position
-        @board[player_coords[0]][player_coords[1]] = "player_#{index + 1}"
-      end
-
-      @game.cover.each do |cover|
-        cover_coords = cover.position
-        @board[cover_coords[0]][cover_coords[1]] = cover.type
-      end
-
-      @game.enemies.each_with_index do |enemy, index|
-        next unless enemy.visible?
-        enemy_coords = enemy.current_position
-
-        @board[enemy_coords[0]][enemy_coords[1]] =
-          if enemy.damaged?
-            "damage_#{enemy.damage_amount}"
-          elsif enemy.missed?
-            "miss"
-          else
-            "enemy_#{index + 1}"
-          end
-      end
-
-      unless @game.fired_shot.nil? || !@game.fired_shot.visible?
-        fired_shot_coords = @game.fired_shot.current_position
-        @board[fired_shot_coords[0]][fired_shot_coords[1]] = :fired_shot
       end
     end
 
@@ -84,7 +43,7 @@ module Xcommy
     end
 
     def spot_screen
-      if @board[@cursor_coords[0]][@cursor_coords[1]].nil?
+      if @board.data[@cursor_coords[0]][@cursor_coords[1]].nil?
         :spot
       else
         @alert_message = "Spot not available"
@@ -99,7 +58,7 @@ module Xcommy
     def refresh!
       @cursor_index = 0
       @cursor_coords = [4, 5] #@game.current_player.postion
-      refresh_board!
+      @board.refresh!
     end
 
     def enemy_1
@@ -107,13 +66,13 @@ module Xcommy
 
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
-        refresh_board!
+        @board.refresh!
         show! screen(:enemy_1)
         long_sleep
       end
 
       @game.fired_shot.hide!
-      refresh_board!
+      @board.refresh!
       show! screen(:enemy_1)
       long_sleep
 
@@ -138,38 +97,38 @@ module Xcommy
 
     def render_player_message(player, damage)
       player.miss!
-      refresh_board!
+      @board.refresh!
       show! screen(:miss)
       short_sleep
 
       player.show!
-      refresh_board!
+      @board.refresh!
       show! screen(:miss)
       short_sleep
     end
 
     def render_player_damage(player, damage)
       player.damage!(damage)
-      refresh_board!
+      @board.refresh!
       show! screen(:hit)
       short_sleep
 
       player.reset_damage!
 
       player.show!
-      refresh_board!
+      @board.refresh!
       show! screen(:hit)
       short_sleep
     end
 
     def render_blinking_player(player, screen_type)
       player.hide!
-      refresh_board!
+      @board.refresh!
       show! screen(screen_type)
       short_sleep
 
       player.show!
-      refresh_board!
+      @board.refresh!
       show! screen(screen_type)
       short_sleep
     end
@@ -194,7 +153,7 @@ module Xcommy
       @game.current_player.current_destination = @cursor_coords
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
-        refresh_board!
+        @board.refresh!
         show! screen(:move_to)
         long_sleep
       end
@@ -239,11 +198,11 @@ module Xcommy
       when :up
         @cursor_coords[0] -= 1 unless @cursor_coords[0] == 0
       when :down
-        @cursor_coords[0] += 1 unless @cursor_coords[0] == (@spot_width - 1)
+        @cursor_coords[0] += 1 unless @cursor_coords[0] == (Board.spot_length - 1)
       when :left
         @cursor_coords[1] -= 1 unless @cursor_coords[1] == 0
       when :right
-        @cursor_coords[1] += 1 unless @cursor_coords[1] == (@spot_width - 1)
+        @cursor_coords[1] += 1 unless @cursor_coords[1] == (Board.spot_length - 1)
       end
     end
 
@@ -280,7 +239,7 @@ module Xcommy
     end
 
     def find_spot_type(spot_coords)
-      board_spot = @board[spot_coords[0]][spot_coords[1]]
+      board_spot = @board.data[spot_coords[0]][spot_coords[1]]
 
       return board_spot unless spot_cursor_visible?
 
@@ -309,12 +268,12 @@ module Xcommy
 
     def playing_board
       rows = []
-      rows << Array.new(@spot_width, "_____").join + "_"
-      @spot_width.times do |outer_index|
+      rows << Array.new(Board.spot_length, "_____").join + "_"
+      Board.spot_length.times do |outer_index|
         top = []
         bottom = []
 
-        @spot_width.times do |inner_index|
+        Board.spot_length.times do |inner_index|
           spot_type = find_spot_type [outer_index, inner_index]
           top << Spot.for(:top, spot_type).to_s
           bottom << Spot.for(:bottom, spot_type).to_s
@@ -327,12 +286,10 @@ module Xcommy
     end
 
     def turn_display
-      turns_left = @game.current_player.turns_left
-
       prefix =
-        if turns_left == 2
+        if @game.turns_left == 2
           1
-        elsif turns_left == 1
+        elsif @game.turns_left == 1
           2
         else
           0

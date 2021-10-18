@@ -1,13 +1,25 @@
 require 'io/console'
 module Xcommy
   class Game
-    attr_accessor :cover, :enemies, :players, :current_player, :fired_shot
+    attr_accessor :cover,
+      :enemies,
+      :players,
+      :current_player,
+      :fired_shot,
+      :current_turns,
+      :board
 
     def initialize
       @cover = []
       @enemies = []
       @players = []
+      @board = Board.new self
+      @current_turns = []
       @fired_shot = nil
+    end
+
+    def turns_left
+      2 - @current_turns.count
     end
 
     def current_screen
@@ -15,6 +27,7 @@ module Xcommy
     end
 
     def start
+      @board.refresh!
       @display = Display.new self
       @current_player = players.first
       render(:turn)

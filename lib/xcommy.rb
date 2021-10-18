@@ -1,4 +1,5 @@
 require_relative "xcommy/version"
+require_relative "xcommy/board"
 require_relative "xcommy/game"
 require_relative "xcommy/entity"
 require_relative "xcommy/player"

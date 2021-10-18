@@ -1,6 +1,6 @@
 module Xcommy
   class Entity
-    attr_accessor :health, :current_destination, :current_position, :turns_left, :is_visible, :damage_amount, :miss
+    attr_accessor :health, :current_destination, :current_position, :is_visible, :damage_amount, :miss
 
     def duplicate_coords(coords)
       [coords[0], coords[1]]
@@ -11,7 +11,6 @@ module Xcommy
       @health = 100
       @damage_amount = 0
       @current_position = starting_position
-      @turns_left = 2
       clear_turn_cache
       show!
     end
@@ -55,10 +54,6 @@ module Xcommy
     def move_to!(position)
       @current_position = position
       #@game.render(:move)
-    end
-
-    def completed_turn!
-      @turns_left -= 1
     end
 
     def move_to_next_position!

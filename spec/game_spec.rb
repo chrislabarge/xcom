@@ -24,17 +24,35 @@ module Xcommy
           end
 
           describe "canceling chosen spot" do
-            it "reverts to original turn menu" do
+            before do
               subject.mock_input(down)
               subject.mock_input(enter)
+            end
+
+            it "reverts to original turn menu" do
               expect(subject.current_screen).to eq :turn
+            end
+
+            it "maintains turns left" do
+              expect(subject.turns_left).to eq 2
             end
           end
 
           describe "confirming chosen spot" do
-            it "moves the player" do
+            before do
               subject.mock_input(enter)
+            end
+
+            it "moves the player" do
               expect(subject.current_player.current_position).to eq [8, 0]
+            end
+
+            it "renders the turn screen" do
+              expect(subject.current_screen).to eq :turn
+            end
+
+            it "subtracts a turn" do
+              expect(subject.turns_left).to eq 1
             end
           end
         end
@@ -48,10 +66,17 @@ module Xcommy
 
         describe "fire sub-menu" do
           describe "choosing Cancel" do
-            it "reverts to original turn menu" do
+            before do
               subject.mock_input(down)
               subject.mock_input(enter)
+            end
+
+            it "reverts to original turn menu" do
               expect(subject.current_screen).to eq :turn
+            end
+
+            it "maintains turns left" do
+              expect(subject.turns_left).to eq 2
             end
           end
 
@@ -70,6 +95,7 @@ module Xcommy
               expect(subject.current_player).to have_received(:fire_at!)
               expect(enemy.health).to be < 100
               expect(subject.current_screen).to eq :turn
+              expect(subject.turns_left).to eq 1
             end
 
             it "misses Enemy 1" do
@@ -79,6 +105,7 @@ module Xcommy
               expect(subject.current_player).to have_received(:fire_at!)
               expect(enemy.health).to eq 100
               expect(subject.current_screen).to eq :turn
+              expect(subject.turns_left).to eq 1
             end
           end
         end
