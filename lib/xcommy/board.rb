@@ -20,8 +20,7 @@ module Xcommy
       @data[@cursor_coords[0]][@cursor_coords[1]]
     end
 
-    def cursor_select!
-      @game.display.cursor_index = 0
+    def show_spot_cursor!
       @cursor_coords = [4, 5]
       fill_board!
     end

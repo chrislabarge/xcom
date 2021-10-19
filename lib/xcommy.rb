@@ -9,6 +9,7 @@ require_relative "xcommy/cover"
 require_relative "xcommy/display"
 require_relative "xcommy/setup"
 require_relative "xcommy/spot"
+require_relative "xcommy/user_interface"
 
 module Xcommy
   class Error < StandardError; end

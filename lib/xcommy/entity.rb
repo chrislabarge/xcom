@@ -35,12 +35,20 @@ module Xcommy
       @miss = true
     end
 
+    def reset_miss!
+      @miss == false
+    end
+
     def missed?
       @miss == true
     end
 
     def damaged?
       @damage_amount.positive?
+    end
+
+    def reset_damage!
+      @miss == false
     end
 
     def reset_damage!
