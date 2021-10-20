@@ -51,7 +51,7 @@ module Xcommy
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
         @game.board.refresh!
-        show! screen(:move_to)
+        show! @screen.render(:move_to)
         long_sleep
       end
     end
@@ -59,40 +59,40 @@ module Xcommy
     def render_player_message(player, damage)
       player.miss!
       @game.board.refresh!
-      show! screen(:miss)
+      show! @screen.render(:miss)
       short_sleep
 
       player.reset_miss!
 
       player.show!
       @game.board.refresh!
-      show! screen(:miss)
+      show! @screen.render(:miss)
       short_sleep
     end
 
     def render_player_damage(player, damage)
       player.damage!(damage)
       @game.board.refresh!
-      show! screen(:hit)
+      show! @screen.render(:hit)
       short_sleep
 
       player.reset_damage!
 
       player.show!
       @game.board.refresh!
-      show! screen(:hit)
+      show! @screen.render(:hit)
       short_sleep
     end
 
     def render_blinking_player(player, screen_type)
       player.hide!
       @game.board.refresh!
-      show! screen(screen_type)
+      show! @screen.render(screen_type)
       short_sleep
 
       player.show!
       @game.board.refresh!
-      show! screen(screen_type)
+      show! @screen.render(screen_type)
       short_sleep
     end
 
@@ -104,13 +104,13 @@ module Xcommy
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
         @game.board.refresh!
-        show! screen(:enemy_1)
+        show! @screen.render(:enemy_1)
         long_sleep
       end
 
       @game.fired_shot.hide!
       @game.board.refresh!
-      show! screen(:enemy_1)
+      show! @screen.render(:enemy_1)
       long_sleep
 
       send(@game.fired_shot.result)
@@ -134,13 +134,6 @@ module Xcommy
 
     def show!(content)
       puts content
-    end
-
-    # TODO: Try to extract this into a screen class
-
-    def screen(current)
-      @current_screen = current
-      @screen.render(current)
     end
 
     def change_cursor_position(direction)
