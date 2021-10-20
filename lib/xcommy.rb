@@ -10,6 +10,7 @@ require_relative "xcommy/display"
 require_relative "xcommy/setup"
 require_relative "xcommy/spot"
 require_relative "xcommy/user_interface"
+require_relative "xcommy/screen"
 
 module Xcommy
   class Error < StandardError; end

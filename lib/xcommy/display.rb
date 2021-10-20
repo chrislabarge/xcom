@@ -12,16 +12,20 @@ module Xcommy
       @content = []
       @game = game
       @user_interface = UserInterface.new(@game)
+      @screen = Screen.new(@game, @user_interface)
       @current_screen = nil
     end
 
-    def render(screen_sym)
-      if cinematic_screens.include?(screen_sym.to_sym)
-        send(screen_sym)
-        @game.current_turns << screen_sym
+    def render(turn_option)
+      if Screen.cinematic.include?(turn_option.to_sym)
+        send(turn_option)
+        @game.current_turns << turn_option
         render(:turn)
       else
-        show! send(screen_sym)
+        screen_type = turn_option.to_sym
+        screen_type = :turn if screen_type == :cancel
+        @current_screen = screen_type
+        show! @screen.render(screen_type)
       end
     end
 
@@ -29,9 +33,9 @@ module Xcommy
       case @current_screen
       when :move
         @user_interface.refresh_alert_message!
-        spot_screen
+        @screen.spot_screen
       else option = @user_interface.cursor_selected_menu_option
-        unless cinematic_screens.include?(option)
+        unless Screen.cinematic.include?(option)
           @user_interface.cursor_index = 0
           @game.board.show_spot_cursor!
         end
@@ -39,51 +43,17 @@ module Xcommy
       end
     end
 
-    def spot_screen
-      if @game.board.cursor_spot.nil?
-        :spot
-      else
-        @user_interface.alert_message = "Spot not available"
-        :move
-      end
-    end
+    # These are all cinematic instructions for rendering multiple screens for a
+    # player to watch. All modeled after the #move_to
 
-    def spot
-      screen(:spot)
-    end
-
-    def enemy_1
-      @game.new_fired_shot(at: @game.enemies.first)
-
-      while !@game.fired_shot.reached_destination?
-        @game.fired_shot.move_to_next_position!
+    def move_to
+      @game.current_player.current_destination = @game.board.cursor_coords
+      while !@game.current_player.reached_destination?
+        @game.current_player.move_to_next_position!
         @game.board.refresh!
-        show! screen(:enemy_1)
+        show! screen(:move_to)
         long_sleep
       end
-
-      @game.fired_shot.hide!
-      @game.board.refresh!
-      show! screen(:enemy_1)
-      long_sleep
-
-      send(@game.fired_shot.result)
-      @game.fired_shot = nil
-    end
-
-    def miss
-      render_blinking_player @game.fired_shot.at_player, :miss
-      render_player_message @game.fired_shot.at_player, "Miss"
-      render_player_message @game.fired_shot.at_player, "Miss"
-      render_blinking_player @game.fired_shot.at_player, :miss
-    end
-
-    def hit
-      render_blinking_player @game.fired_shot.at_player, :hit
-      render_player_damage @game.fired_shot.at_player, 10
-      render_player_damage @game.fired_shot.at_player, 10
-      @game.fired_shot.at_player.health -= 10
-      render_blinking_player @game.fired_shot.at_player, :hit
     end
 
     def render_player_message(player, damage)
@@ -126,30 +96,40 @@ module Xcommy
       short_sleep
     end
 
-    def turn
-      screen(:turn)
-    end
+    # These are all screen types below..should get extracted into a new screen_type resource
 
-    def cancel
-      screen(:turn)
-    end
+    def enemy_1
+      @game.new_fired_shot(at: @game.enemies.first)
 
-    def move
-      screen(:move)
-    end
-
-    def fire
-      screen(:fire)
-    end
-
-    def move_to
-      @game.current_player.current_destination = @game.board.cursor_coords
-      while !@game.current_player.reached_destination?
-        @game.current_player.move_to_next_position!
+      while !@game.fired_shot.reached_destination?
+        @game.fired_shot.move_to_next_position!
         @game.board.refresh!
-        show! screen(:move_to)
+        show! screen(:enemy_1)
         long_sleep
       end
+
+      @game.fired_shot.hide!
+      @game.board.refresh!
+      show! screen(:enemy_1)
+      long_sleep
+
+      send(@game.fired_shot.result)
+      @game.fired_shot = nil
+    end
+
+    def miss
+      render_blinking_player @game.fired_shot.at_player, :miss
+      render_player_message @game.fired_shot.at_player, "Miss"
+      render_player_message @game.fired_shot.at_player, "Miss"
+      render_blinking_player @game.fired_shot.at_player, :miss
+    end
+
+    def hit
+      render_blinking_player @game.fired_shot.at_player, :hit
+      render_player_damage @game.fired_shot.at_player, 10
+      render_player_damage @game.fired_shot.at_player, 10
+      @game.fired_shot.at_player.health -= 10
+      render_blinking_player @game.fired_shot.at_player, :hit
     end
 
     def show!(content)
@@ -157,38 +137,10 @@ module Xcommy
     end
 
     # TODO: Try to extract this into a screen class
+
     def screen(current)
-      @content = []
       @current_screen = current
-      5.times do
-        content << blank_line
-      end
-      content << boarder_horizontal
-      content << merge_components(
-        @game.board.render,
-        @user_interface.render(@current_screen)
-      )
-      content << blank_line
-      content << boarder_horizontal
-      content << blank_line
-      content
-    end
-
-    def merge_components(playing_board, user_interface)
-      merger = []
-
-      playing_board.each_with_index do |display_line, index|
-        connector =
-          if index == 0 || index == (playing_board.count - 1)
-            "_"
-          else
-            " "
-          end
-
-        merger[index] = "   " + display_line + connector + user_interface[index]
-      end
-
-      merger
+      @screen.render(current)
     end
 
     def change_cursor_position(direction)
@@ -202,21 +154,11 @@ module Xcommy
       end
     end
 
-    def blank_line
-      print ""
-    end
-
     def spot_cursor_visible?
       @current_screen == :move || @current_screen == :spot
     end
 
-    def boarder_horizontal
-      Array.new(85, "=").join
-    end
-
-    def cinematic_screens
-      [:move_to, :enemy_1, :hit, :miss]
-    end
+    # These are display controlls. I think they make sense to live in this file
 
     def long_sleep
       sleep(
