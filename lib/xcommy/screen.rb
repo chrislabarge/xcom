@@ -8,10 +8,6 @@ module Xcommy
       @user_interface = user_interface
     end
 
-    def self.cinematic
-      [:move_to, :enemy_1, :hit, :miss]
-    end
-
     def spot_screen
       if @game.board.cursor_spot.nil?
         :spot
