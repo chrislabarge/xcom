@@ -2,13 +2,13 @@ require 'io/console'
 module Xcommy
   class Game
     attr_accessor :cover,
-      :enemies,
-      :players,
-      :current_player,
-      :fired_shot,
-      :current_turns,
-      :board,
-      :display
+                  :enemies,
+                  :players,
+                  :current_player,
+                  :fired_shot,
+                  :current_turns,
+                  :board,
+                  :display
 
     def initialize
       @cover = []

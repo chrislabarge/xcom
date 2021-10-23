@@ -3,6 +3,8 @@ module Xcommy
   # The screen just glues them together
   # This model should really be called "screen builder" dependent on how I store state
   class Screen
+    attr_accessor :current
+
     def initialize(game, user_interface)
       @game = game
       @user_interface = user_interface
@@ -17,20 +19,29 @@ module Xcommy
       end
     end
 
+    def set_current(screen_type)
+      type = screen_type.to_sym
+      type = :turn if type == :cancel
+      @current = type
+    end
+
     def render(screen_type)
+      set_current screen_type
       content = []
+
       5.times do
         content << blank_line
       end
       content << boarder_horizontal
       content << merge_components(
         @game.board.render,
-        @user_interface.render(screen_type),
+        @user_interface.render(@current),
       )
       content << blank_line
       content << boarder_horizontal
       content << blank_line
-      content
+
+      show! content
     end
 
     def merge_components(playing_board, user_interface)
@@ -56,6 +67,10 @@ module Xcommy
 
     def boarder_horizontal
       Array.new(85, "=").join
+    end
+
+    def show!(content)
+      puts content
     end
   end
 end

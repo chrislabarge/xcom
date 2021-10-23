@@ -4,9 +4,8 @@ module Xcommy
     SHORT_SLEEP = 0.35
     TESTING_SLEEP = 0.0
 
-    def initialize(game, display, screen)
+    def initialize(game, screen)
       @game = game
-      @display = display
       @screen = screen
     end
 
@@ -21,7 +20,9 @@ module Xcommy
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
         @game.board.refresh!
-        @display.show! @screen.render(:move_to)
+
+        @screen.render(:move_to)
+
         long_sleep
       end
     end
@@ -32,13 +33,17 @@ module Xcommy
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
         @game.board.refresh!
-        @display.show! @screen.render(:enemy_1)
+
+        @screen.render(:enemy_1)
+
         long_sleep
       end
 
       @game.fired_shot.hide!
       @game.board.refresh!
-      @display.show! @screen.render(:enemy_1)
+
+      @screen.render(:enemy_1)
+
       long_sleep
 
       send(@game.fired_shot.result)
@@ -63,14 +68,18 @@ module Xcommy
     def render_player_message(player, damage)
       player.miss!
       @game.board.refresh!
-      @display.show! @screen.render(:miss)
+
+      @screen.render(:miss)
+
       short_sleep
 
       player.reset_miss!
 
       player.show!
       @game.board.refresh!
-      @display.show! @screen.render(:miss)
+
+      @screen.render(:miss)
+
       short_sleep
     end
 
@@ -78,26 +87,26 @@ module Xcommy
     def render_player_damage(player, damage)
       player.damage!(damage)
       @game.board.refresh!
-      @display.show! @screen.render(:hit)
+      @screen.render(:hit)
       short_sleep
 
       player.reset_damage!
 
       player.show!
       @game.board.refresh!
-      @display.show! @screen.render(:hit)
+      @screen.render(:hit)
       short_sleep
     end
 
     def render_blinking_player(player, screen_type)
       player.hide!
       @game.board.refresh!
-      @display.show! @screen.render(screen_type)
+      @screen.render(screen_type)
       short_sleep
 
       player.show!
       @game.board.refresh!
-      @display.show! @screen.render(screen_type)
+      @screen.render(screen_type)
       short_sleep
     end
 
