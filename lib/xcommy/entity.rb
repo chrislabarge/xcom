@@ -27,8 +27,8 @@ module Xcommy
       @is_visible == true
     end
 
-    def damage!(amount)
-      @damage_amount = amount
+    def hit!
+      @damage_amount = @game.hit_damage
     end
 
     def miss!
@@ -36,7 +36,7 @@ module Xcommy
     end
 
     def reset_miss!
-      @miss == false
+      @miss = false
     end
 
     def missed?
@@ -47,11 +47,7 @@ module Xcommy
       @damage_amount.positive?
     end
 
-    def reset_damage!
-      @miss == false
-    end
-
-    def reset_damage!
+    def reset_hit!
       @damage_amount = 0
     end
 

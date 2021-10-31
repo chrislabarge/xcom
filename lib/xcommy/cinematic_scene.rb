@@ -46,56 +46,32 @@ module Xcommy
 
       long_sleep
 
-      send(@game.fired_shot.result)
+      render_player_spot_message(
+        @game.fired_shot.at_player,
+        @game.fired_shot.result,
+      )
+
       @game.fired_shot = nil
     end
 
-    def miss
-      render_blinking_player @game.fired_shot.at_player, :miss
-      render_player_message @game.fired_shot.at_player, "Miss"
-      render_player_message @game.fired_shot.at_player, "Miss"
-      render_blinking_player @game.fired_shot.at_player, :miss
-    end
+    def render_player_spot_message(player, hit_or_miss)
+      render_blinking_player player, hit_or_miss
 
-    def hit
-      render_blinking_player @game.fired_shot.at_player, :hit
-      render_player_damage @game.fired_shot.at_player, 10
-      render_player_damage @game.fired_shot.at_player, 10
-      @game.fired_shot.at_player.health -= 10
-      render_blinking_player @game.fired_shot.at_player, :hit
-    end
+      2.times do
+        player.send("#{hit_or_miss}!")
+        @game.board.refresh!
+        @screen.render(hit_or_miss)
+        short_sleep
 
-    def render_player_message(player, damage)
-      player.miss!
-      @game.board.refresh!
+        player.send("reset_#{hit_or_miss}!")
 
-      @screen.render(:miss)
+        player.show!
+        @game.board.refresh!
+        @screen.render(hit_or_miss)
+        short_sleep
+      end
 
-      short_sleep
-
-      player.reset_miss!
-
-      player.show!
-      @game.board.refresh!
-
-      @screen.render(:miss)
-
-      short_sleep
-    end
-
-
-    def render_player_damage(player, damage)
-      player.damage!(damage)
-      @game.board.refresh!
-      @screen.render(:hit)
-      short_sleep
-
-      player.reset_damage!
-
-      player.show!
-      @game.board.refresh!
-      @screen.render(:hit)
-      short_sleep
+      render_blinking_player player, hit_or_miss
     end
 
     def render_blinking_player(player, screen_type)

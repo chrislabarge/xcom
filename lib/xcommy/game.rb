@@ -6,6 +6,7 @@ module Xcommy
                   :players,
                   :current_player,
                   :fired_shot,
+                  :hit_damage,
                   :current_turns,
                   :board,
                   :display
@@ -17,6 +18,7 @@ module Xcommy
       @board = Board.new self
       @current_turns = []
       @fired_shot = nil
+      @hit_damage = 10
     end
 
     def turns_left
@@ -82,7 +84,7 @@ module Xcommy
 
     def firing_outcome(attempting_entity, receiving_entity)
       if successfully_hit?(attempting_entity, receiving_entity)
-        receiving_entity.health -= 10
+        receiving_entity.health -= @hit_damage
         :hit
       else
         :miss
