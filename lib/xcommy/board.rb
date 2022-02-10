@@ -69,7 +69,7 @@ module Xcommy
 
       return board_spot unless @game.display.spot_cursor_visible?
 
-      cursor_spot_type(spot_coords) || board_spot
+      board_spot || cursor_spot_type(spot_coords)
     end
 
     def cursor_spot_type(spot_coords)
