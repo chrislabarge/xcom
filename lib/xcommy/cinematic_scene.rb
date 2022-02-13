@@ -16,7 +16,7 @@ module Xcommy
     # Try to make this match Screen where we can call #render and pass in the type
 
     def move_to
-      @game.current_player.current_destination = @game.board.cursor_coords
+      @game.current_player.current_destination = @game.board.cursor.coords
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
         @game.board.refresh!

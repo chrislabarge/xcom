@@ -33,8 +33,12 @@ module Xcommy
         @screen.spot_screen
       else option = @user_interface.cursor_selected_menu_option
         unless CinematicScene.types.include?(option)
+          # have this user interface stuff start up coming from the class itself
           @user_interface.cursor_index = 0
-          @game.board.show_spot_cursor!
+          @game.board.cursor.set_on(
+            @user_interface.current_cursor_menu_option_board_object.current_position
+          )
+          @game.board.refresh!
         end
         option
       end
@@ -43,16 +47,21 @@ module Xcommy
     def change_cursor_position(direction)
       case current_screen
       when :move
-        @game.board.update_cursor_coords direction
+        @game.board.cursor.move_in direction
       when :fire
         @user_interface.update_cursor_index direction
+
+          if @user_interface.cursor_selected_menu_option == :cancel
+            @game.board.cursor.hide!
+          else
+            @game.board.cursor.set_on(
+              @user_interface.current_cursor_menu_option_board_object.current_position
+            )
+            @game.board.refresh!
+          end
       else
         @user_interface.update_cursor_index direction
       end
-    end
-
-    def spot_cursor_visible?
-      current_screen == :move || current_screen == :spot
     end
   end
 end

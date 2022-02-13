@@ -11,7 +11,7 @@ module Xcommy
     end
 
     def spot_screen
-      if @game.board.cursor_spot.nil?
+      if @game.board.cursor.spot.nil?
         :spot
       else
         @user_interface.alert_message = "Spot not available"

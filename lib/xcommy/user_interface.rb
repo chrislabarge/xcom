@@ -15,6 +15,11 @@ module Xcommy
       @content
     end
 
+    def current_cursor_menu_option_board_object
+      # This will need to be dynamically dirived
+      @game.enemies[0]
+    end
+
     def refresh_alert_message!
       @alert_message = nil
     end

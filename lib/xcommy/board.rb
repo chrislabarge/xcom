@@ -1,28 +1,17 @@
 module Xcommy
   class Board
-    attr_accessor :cursor_coords
+    attr_reader :cursor
+    attr_reader :game
+    attr_reader :data
 
     def initialize(game)
       @game = game
       @data = {}
-      @cursor_coords = []
+      @cursor = BoardCursor.new(self)
     end
 
     def self.spot_length
       10
-    end
-
-    def data
-      @data
-    end
-
-    def cursor_spot
-      @data[@cursor_coords[0]][@cursor_coords[1]]
-    end
-
-    def show_spot_cursor!
-      @cursor_coords = [4, 5]
-      fill_board!
     end
 
     def refresh!
@@ -48,44 +37,14 @@ module Xcommy
       rows
     end
 
-
-    def update_cursor_coords(direction)
-      case direction
-      when :up
-        @cursor_coords[0] -= 1 unless @cursor_coords[0] == 0
-      when :down
-        @cursor_coords[0] += 1 unless @cursor_coords[0] == (self.class.spot_length - 1)
-      when :left
-        @cursor_coords[1] -= 1 unless @cursor_coords[1] == 0
-      when :right
-        @cursor_coords[1] += 1 unless @cursor_coords[1] == (self.class.spot_length - 1)
-      end
-    end
-
     private
 
     def find_spot_type(spot_coords)
       board_spot = @data[spot_coords[0]][spot_coords[1]]
 
-      return board_spot unless @game.display.spot_cursor_visible?
+      return board_spot unless @game.board.cursor.visible?
 
-      board_spot || cursor_spot_type(spot_coords)
-    end
-
-    def cursor_spot_type(spot_coords)
-      if @cursor_coords[1] == spot_coords[1]
-        if @cursor_coords[0] == spot_coords[0] + 1
-          :top_cursor
-        elsif @cursor_coords[0] == spot_coords[0] - 1
-          :bottom_cursor
-        end
-      elsif @cursor_coords[0] == spot_coords[0]
-        if @cursor_coords[1] == spot_coords[1] + 1
-          :left_cursor
-        elsif @cursor_coords[1] == spot_coords[1] - 1
-          :right_cursor
-        end
-      end
+      board_spot || @cursor.spot_display_type(spot_coords)
     end
 
     def fill_board!
