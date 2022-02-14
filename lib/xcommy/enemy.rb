@@ -23,7 +23,9 @@ module Xcommy
     end
 
     def best_offensive_spot
-      # This like the best cover is just a dumb way of determining the spot for right now
+      # This like the best cover is just a dumb way of determining the spot for
+      # right now
+
       best_spot = best_player_to_hit.current_position
       best_spot[0] -= 1
       best_spot

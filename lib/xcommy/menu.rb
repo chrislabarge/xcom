@@ -16,6 +16,19 @@ module Xcommy
       @game.enemies[0]
     end
 
+    def show_cursor!
+      if current_selection == :fire
+        @game.board.cursor.set_on(
+          highlighted_board_object_option.current_position,
+        )
+      else
+        @game.board.cursor.set_on_center_spot
+      end
+
+      @cursor.move_to_top
+      @game.board.refresh!
+    end
+
     def options
       case @user_interface.current_screen
       when :spot

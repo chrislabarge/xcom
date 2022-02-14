@@ -27,49 +27,29 @@ module Xcommy
     end
 
     def current_selection
-      case current_screen
-      when :move
+      if current_screen == :move
         @user_interface.refresh_alert_message!
         @screen.spot_screen
-      else option = @user_interface.menu.current_selection
+      else
+        option = @user_interface.menu.current_selection
+
         unless CinematicScene.types.include?(option)
-
-          # have this user interface stuff start up coming from the class
-          # itself
-          # There should be a menu class that uses a Menu Cursor
-          @user_interface.menu.cursor.move_to_top
-
-          if option == :fire
-            @game.board.cursor.set_on(
-              @user_interface.menu.highlighted_board_object_option.current_position
-            )
-          else
-            @game.board.cursor.set_on_center_spot
-          end
-
-          @game.board.refresh!
+          @user_interface.menu.show_cursor!
         end
+
         option
       end
     end
 
     def change_cursor_position(direction)
-      case current_screen
-      when :move
+      if current_screen == :move
         @game.board.cursor.move_in direction
-      when :fire
-        @user_interface.menu.cursor.move_in direction
-
-          if @user_interface.menu.current_selection == :cancel
-            @game.board.cursor.hide!
-          else
-            @game.board.cursor.set_on(
-              @user_interface.menu.highlighted_board_object_option.current_position
-            )
-          end
-          @game.board.refresh!
       else
         @user_interface.menu.cursor.move_in direction
+      end
+
+      if current_screen == :fire
+        @game.board.toggle_static_cursor
       end
     end
   end

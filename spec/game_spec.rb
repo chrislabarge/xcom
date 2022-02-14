@@ -89,20 +89,18 @@ module Xcommy
             end
 
             it "hits Enemy 1" do
-              allow(subject.current_player).to receive(:fire_at!) { :hit }
+              allow(subject).to receive(:successfully_hit?) { true }
               subject.mock_input(enter)
               expect(fired_shot.current_position).to eq enemy.current_position
-              expect(subject.current_player).to have_received(:fire_at!)
               expect(enemy.health).to be < 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1
             end
 
             it "misses Enemy 1" do
-              allow(subject.current_player).to receive(:fire_at!) { :miss }
+              allow(subject).to receive(:successfully_hit?) { false }
               subject.mock_input(enter)
               expect(fired_shot.current_position).to eq enemy.current_position
-              expect(subject.current_player).to have_received(:fire_at!)
               expect(enemy.health).to eq 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1

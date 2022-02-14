@@ -105,7 +105,7 @@ module Xcommy
     def miss_chance_percentage(entity_firing, entity_receiving)
       distance = distance_between(
         entity_firing.current_position,
-        entity_receiving.current_position
+        entity_receiving.current_position,
       )
 
       # Test for this

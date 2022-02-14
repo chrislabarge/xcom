@@ -18,6 +18,18 @@ module Xcommy
       fill_board!
     end
 
+    def toggle_static_cursor
+      if @game.display.user_interface.menu.current_selection == :cancel
+        @game.board.cursor.hide!
+      else
+        @game.board.cursor.set_on(
+          @game.display.user_interface.menu.highlighted_board_object_option.current_position,
+        )
+      end
+
+      @game.board.refresh!
+    end
+
     def render
       rows = []
       rows << Array.new(self.class.spot_length, "_____").join + "_"
