@@ -33,11 +33,20 @@ module Xcommy
         @screen.spot_screen
       else option = @user_interface.cursor_selected_menu_option
         unless CinematicScene.types.include?(option)
-          # have this user interface stuff start up coming from the class itself
+
+          # have this user interface stuff start up coming from the class
+          # itself
+          # There should be a menu class that uses a Menu Cursor
           @user_interface.cursor_index = 0
-          @game.board.cursor.set_on(
-            @user_interface.current_cursor_menu_option_board_object.current_position
-          )
+
+          if option == :fire
+            @game.board.cursor.set_on(
+              @user_interface.current_cursor_menu_option_board_object.current_position
+            )
+          else
+            @game.board.cursor.set_on_center_spot
+          end
+
           @game.board.refresh!
         end
         option
@@ -57,8 +66,8 @@ module Xcommy
             @game.board.cursor.set_on(
               @user_interface.current_cursor_menu_option_board_object.current_position
             )
-            @game.board.refresh!
           end
+          @game.board.refresh!
       else
         @user_interface.update_cursor_index direction
       end

@@ -17,14 +17,12 @@ module Xcommy
     end
 
     # Not being used
-    def show!
+    def set_on_center_spot
       @coords = [4, 5]
-      @board.refresh!
     end
 
     def hide!
       @coords = []
-      @board.refresh!
     end
 
     def set_on(spot_coords)

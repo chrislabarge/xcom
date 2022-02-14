@@ -1,10 +1,11 @@
 module Xcommy
   class UserInterface
-    attr_accessor :cursor_index, :alert_message
+    attr_accessor :cursor_index, :alert_message, :current_screen, :game
 
     def initialize(game)
       @game = game
       @cursor_index = 0
+      @menu = Menu.new(self)
       refresh_alert_message!
     end
 
@@ -25,18 +26,18 @@ module Xcommy
     end
 
     def cursor_selected_menu_option
-      player_options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
+      @menu.options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
     end
 
     def update_cursor_index(direction)
       if direction == :down
         if @cursor_index == 0
-          @cursor_index = player_options.count - 1
+          @cursor_index = @menu.options.count - 1
         else
           @cursor_index -= 1
         end
       else
-        if @cursor_index == player_options.count - 1
+        if @cursor_index == @menu.options.count - 1
           @cursor_index = 0
         else
           @cursor_index += 1
@@ -61,9 +62,9 @@ module Xcommy
       @content << interface_text_line("Turn")
       @content << interface_text_line(turn_display)
 
-      player_options.each do |option|
+      @menu.options.each do |option|
         @content << interface_divider
-        @content << interface_text_line(option, cursor: player_options[@cursor_index] == option)
+        @content << interface_text_line(option, cursor: @menu.options[@cursor_index] == option)
       end
 
       unless @alert_message.nil?
@@ -101,7 +102,7 @@ module Xcommy
     end
 
     def number_of_empty_interface_lines
-      count = (8 - (player_options.count * 2))
+      count = (8 - (@menu.options.count * 2))
       count -= 1 unless @alert_message.nil?
       count
     end
@@ -153,38 +154,6 @@ module Xcommy
 
     def interface_line
       " |" + Array.new(22, " ").join + "|  |"
-    end
-
-    def player_options
-      case @current_screen
-      when :spot
-        ["Move To", "Cancel"]
-      when :move_to
-        ["Move To"]
-      when :move
-        ["Select Spot"]
-      when :fire
-        options = []
-        @game.enemies.each_with_index do |enemy, index|
-          options << enemy_option_text
-        end
-
-        options << "Cancel"
-      when :enemy_1
-        [enemy_option_text]
-      when :hit
-        # TODO - this should come dynamically from the @game.fired_shot model
-        [enemy_option_text]
-      when :miss
-        # TODO - this should come dynamically from the @game.fired_shot model
-        [enemy_option_text]
-      else
-        ["Move", "Fire"]
-      end
-    end
-
-    def enemy_option_text
-      "Enemy 1 (#{@game.enemies[0].health})"
     end
 
     def even_adjustment(text)
