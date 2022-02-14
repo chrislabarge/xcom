@@ -1,8 +1,19 @@
 module Xcommy
   class Menu
+    attr_reader :cursor, :game
+
     def initialize(user_interface)
       @user_interface = user_interface
       @game = user_interface.game
+      @cursor = MenuCursor.new(self)
+    end
+
+    def current_selection
+      options[@cursor.index].gsub(/\s+/, "_").downcase.to_sym
+    end
+
+    def highlighted_board_object_option
+      @game.enemies[0]
     end
 
     def options
@@ -15,7 +26,7 @@ module Xcommy
         ["Select Spot"]
       when :fire
         options = []
-        @game.enemies.each_with_index do |enemy, index|
+        @game.enemies.each do |_enemy|
           options << enemy_option_text
         end
 

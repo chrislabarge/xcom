@@ -1,10 +1,9 @@
 module Xcommy
   class UserInterface
-    attr_accessor :cursor_index, :alert_message, :current_screen, :game
+    attr_accessor :alert_message, :current_screen, :game, :menu
 
     def initialize(game)
       @game = game
-      @cursor_index = 0
       @menu = Menu.new(self)
       refresh_alert_message!
     end
@@ -16,33 +15,8 @@ module Xcommy
       @content
     end
 
-    def current_cursor_menu_option_board_object
-      # This will need to be dynamically dirived
-      @game.enemies[0]
-    end
-
     def refresh_alert_message!
       @alert_message = nil
-    end
-
-    def cursor_selected_menu_option
-      @menu.options[@cursor_index].gsub(/\s+/, "_").downcase.to_sym
-    end
-
-    def update_cursor_index(direction)
-      if direction == :down
-        if @cursor_index == 0
-          @cursor_index = @menu.options.count - 1
-        else
-          @cursor_index -= 1
-        end
-      else
-        if @cursor_index == @menu.options.count - 1
-          @cursor_index = 0
-        else
-          @cursor_index += 1
-        end
-      end
     end
 
     def build!
@@ -64,7 +38,10 @@ module Xcommy
 
       @menu.options.each do |option|
         @content << interface_divider
-        @content << interface_text_line(option, cursor: @menu.options[@cursor_index] == option)
+        @content << interface_text_line(
+          option,
+          cursor: @menu.options[@menu.cursor.index] == option,
+        )
       end
 
       unless @alert_message.nil?

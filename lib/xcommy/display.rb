@@ -31,17 +31,17 @@ module Xcommy
       when :move
         @user_interface.refresh_alert_message!
         @screen.spot_screen
-      else option = @user_interface.cursor_selected_menu_option
+      else option = @user_interface.menu.current_selection
         unless CinematicScene.types.include?(option)
 
           # have this user interface stuff start up coming from the class
           # itself
           # There should be a menu class that uses a Menu Cursor
-          @user_interface.cursor_index = 0
+          @user_interface.menu.cursor.move_to_top
 
           if option == :fire
             @game.board.cursor.set_on(
-              @user_interface.current_cursor_menu_option_board_object.current_position
+              @user_interface.menu.highlighted_board_object_option.current_position
             )
           else
             @game.board.cursor.set_on_center_spot
@@ -58,18 +58,18 @@ module Xcommy
       when :move
         @game.board.cursor.move_in direction
       when :fire
-        @user_interface.update_cursor_index direction
+        @user_interface.menu.cursor.move_in direction
 
-          if @user_interface.cursor_selected_menu_option == :cancel
+          if @user_interface.menu.current_selection == :cancel
             @game.board.cursor.hide!
           else
             @game.board.cursor.set_on(
-              @user_interface.current_cursor_menu_option_board_object.current_position
+              @user_interface.menu.highlighted_board_object_option.current_position
             )
           end
           @game.board.refresh!
       else
-        @user_interface.update_cursor_index direction
+        @user_interface.menu.cursor.move_in direction
       end
     end
   end
