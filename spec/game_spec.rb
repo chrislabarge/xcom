@@ -39,20 +39,46 @@ module Xcommy
           end
 
           describe "confirming chosen spot" do
-            before do
-              subject.mock_input(enter)
+            context "first turn" do
+              before do
+                subject.mock_input(enter)
+              end
+
+              it "moves the player" do
+                expect(subject.current_player.current_position).to eq [8, 0]
+              end
+
+              it "renders the turn screen" do
+                expect(subject.current_screen).to eq :turn
+              end
+
+              it "subtracts a turn" do
+                expect(subject.turns_left).to eq 1
+              end
             end
 
-            it "moves the player" do
-              expect(subject.current_player.current_position).to eq [8, 0]
-            end
+            context "second turn" do
+              before do
+                subject.current_turns = [:move]
+                subject.mock_input(enter)
+              end
 
-            it "renders the turn screen" do
-              expect(subject.current_screen).to eq :turn
-            end
+              it "moves the player" do
+                expect(subject.current_player.current_position).to eq [8, 0]
+              end
 
-            it "subtracts a turn" do
-              expect(subject.turns_left).to eq 1
+              it "renders the NPC turn screen" do
+                # How can I verify it is the NPC taking a turn?
+                # I should allow the USER to control Enemy 1
+                # And then get the game over screen working
+                # and opening screen.
+                # Then I can attempt doing the AI again.
+                expect(subject.current_screen).to eq :turn
+              end
+
+              it "subtracts a turn" do
+                expect(subject.turns_left).to eq 0
+              end
             end
           end
         end

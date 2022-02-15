@@ -1,5 +1,5 @@
 module Xcommy
-  RSpec.describe Enemy do
+  RSpec.describe NPC do
     let!(:game) { Game.new }
     subject { described_class.new(game, [0, 0]) }
 

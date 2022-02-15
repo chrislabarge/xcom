@@ -6,7 +6,7 @@ module Xcommy
 
     def game
       @game = Game.new
-      @game.enemies = [Enemy.new(@game, [0, 0])]
+      @game.enemies = [NPC.new(@game, [0, 0])]
       @game.players = [Player.new(@game, [9, 0])]
       @game.cover = generate_cover
       @game

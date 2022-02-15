@@ -1,5 +1,5 @@
 module Xcommy
-  class Enemy < Entity
+  class NPC < Entity
     def take_turn!
       clear_turn_cache if @turns.count == 2
 
