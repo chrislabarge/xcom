@@ -68,8 +68,8 @@ module Xcommy
       when :spot
         "Spot Selected"
       when :fire
-        "Select Enemy"
-      when :enemy_1
+        "Select Player"
+      when :player_2
         "Firing..."
       when :hit
         "Hit!"

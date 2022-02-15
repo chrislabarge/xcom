@@ -13,7 +13,7 @@ module Xcommy
     end
 
     def highlighted_board_object_option
-      @game.enemies[0]
+      @game.npcs[0]
     end
 
     def show_cursor!
@@ -39,26 +39,26 @@ module Xcommy
         ["Select Spot"]
       when :fire
         options = []
-        @game.enemies.each do |_enemy|
-          options << enemy_option_text
+        @game.npcs.each do |_npc|
+          options << fire_at_player_text
         end
 
         options << "Cancel"
-      when :enemy_1
-        [enemy_option_text]
+      when :player_2
+        [fire_at_player_text]
       when :hit
         # TODO - this should come dynamically from the @game.fired_shot model
-        [enemy_option_text]
+        [fire_at_player_text]
       when :miss
         # TODO - this should come dynamically from the @game.fired_shot model
-        [enemy_option_text]
+        [fire_at_player_text]
       else
         ["Move", "Fire"]
       end
     end
 
-    def enemy_option_text
-      "Enemy 1 (#{@game.enemies[0].health})"
+    def fire_at_player_text
+      "Player 2 (#{@game.npcs[0].health})"
     end
   end
 end

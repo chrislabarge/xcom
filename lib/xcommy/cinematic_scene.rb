@@ -10,7 +10,7 @@ module Xcommy
     end
 
     def self.types
-      [:move_to, :enemy_1, :hit, :miss]
+      [:move_to, :player_2, :hit, :miss]
     end
 
     # Try to make this match Screen where we can call #render and pass in the type
@@ -27,14 +27,14 @@ module Xcommy
       end
     end
 
-    def enemy_1
-      @game.new_fired_shot(at: @game.enemies.first)
+    def player_2
+      @game.new_fired_shot(at: @game.npcs.first)
 
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
         @game.board.refresh!
 
-        @screen.render(:enemy_1)
+        @screen.render(:player_2)
 
         long_sleep
       end
@@ -42,7 +42,7 @@ module Xcommy
       @game.fired_shot.hide!
       @game.board.refresh!
 
-      @screen.render(:enemy_1)
+      @screen.render(:player_2)
 
       long_sleep
 

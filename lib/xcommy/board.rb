@@ -75,17 +75,19 @@ module Xcommy
         @data[cover_coords[0]][cover_coords[1]] = cover.type
       end
 
-      @game.enemies.each_with_index do |enemy, index|
-        next unless enemy.visible?
-        enemy_coords = enemy.current_position
+      @game.npcs.each_with_index do |npc, index|
+        next unless npc.visible?
 
-        @data[enemy_coords[0]][enemy_coords[1]] =
-          if enemy.damaged?
-            "damage_#{enemy.damage_amount}"
-          elsif enemy.missed?
+        npc_coords = npc.current_position
+
+        @data[npc_coords[0]][npc_coords[1]] =
+          if npc.damaged?
+            "damage_#{npc.damage_amount}"
+          elsif npc.missed?
             "miss"
           else
-            "enemy_#{index + 1}"
+            # This + 2 is just to temp get label correct for now
+            "player_#{index + 2}"
           end
       end
 

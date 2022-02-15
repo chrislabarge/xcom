@@ -106,28 +106,28 @@ module Xcommy
             end
           end
 
-          describe "choosing Enemy 1" do
-            let!(:enemy) { subject.enemies.first }
-            let!(:fired_shot) { subject.new_fired_shot(at: enemy) }
+          describe "choosing Player 2" do
+            let!(:npc) { subject.npcs.first }
+            let!(:fired_shot) { subject.new_fired_shot(at: npc) }
 
             before do
               allow(subject).to receive(:fired_shot) { fired_shot }
             end
 
-            it "hits Enemy 1" do
+            it "hits Player 2" do
               allow(subject).to receive(:successfully_hit?) { true }
               subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq enemy.current_position
-              expect(enemy.health).to be < 100
+              expect(fired_shot.current_position).to eq npc.current_position
+              expect(npc.health).to be < 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1
             end
 
-            it "misses Enemy 1" do
+            it "misses Player 2" do
               allow(subject).to receive(:successfully_hit?) { false }
               subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq enemy.current_position
-              expect(enemy.health).to eq 100
+              expect(fired_shot.current_position).to eq npc.current_position
+              expect(npc.health).to eq 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1
             end
@@ -137,23 +137,23 @@ module Xcommy
     end
 
     def enter
-     "\r"
+      "\r"
     end
 
     def down
-     "j"
+      "j"
     end
 
     def left
-     "h"
+      "h"
     end
 
     def right
-     "l"
+      "l"
     end
 
     def up
-     "k"
+      "k"
     end
   end
 end

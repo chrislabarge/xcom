@@ -2,7 +2,7 @@ require 'io/console'
 module Xcommy
   class Game
     attr_accessor :cover,
-                  :enemies,
+                  :npcs,
                   :players,
                   :current_player,
                   :fired_shot,
@@ -13,7 +13,7 @@ module Xcommy
 
     def initialize
       @cover = []
-      @enemies = []
+      @npcs = []
       @players = []
       @board = Board.new self
       @current_turns = []
@@ -51,7 +51,7 @@ module Xcommy
     end
 
     def render(screen)
-      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['enemy_1'])
+      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['player_2'])
       parsed_text = spell_checker.correct(screen).first || screen
       @display.render(parsed_text)
     end

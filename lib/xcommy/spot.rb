@@ -7,9 +7,9 @@ module Xcommy
       }
     end
 
-    def self.enemy_1
+    def self.player_2
       {
-        top: "| E1 ",
+        top: "| P2 ",
         bottom: "|____",
       }
     end
