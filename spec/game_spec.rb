@@ -53,6 +53,7 @@ module Xcommy
               end
 
               it "subtracts a turn" do
+                # This turns left will have to be rethought
                 expect(subject.turns_left).to eq 1
               end
             end
@@ -64,20 +65,15 @@ module Xcommy
               end
 
               it "moves the player" do
-                expect(subject.current_player.current_position).to eq [8, 0]
+                expect(subject.players[0].current_position).to eq [8, 0]
               end
 
-              it "renders the NPC turn screen" do
-                # How can I verify it is the NPC taking a turn?
-                # I should allow the USER to control Enemy 1
-                # And then get the game over screen working
-                # and opening screen.
-                # Then I can attempt doing the AI again.
+              it "switches to Player 2's turn" do
+                expect(subject.current_player).to eq subject.players[1]
+              end
+
+              it "renders the turn screen for Player 2" do
                 expect(subject.current_screen).to eq :turn
-              end
-
-              it "subtracts a turn" do
-                expect(subject.turns_left).to eq 0
               end
             end
           end
@@ -107,8 +103,8 @@ module Xcommy
           end
 
           describe "choosing Player 2" do
-            let!(:npc) { subject.npcs.first }
-            let!(:fired_shot) { subject.new_fired_shot(at: npc) }
+            let!(:player_2) { subject.players[1] }
+            let!(:fired_shot) { subject.new_fired_shot(at: player_2) }
 
             before do
               allow(subject).to receive(:fired_shot) { fired_shot }
@@ -117,8 +113,8 @@ module Xcommy
             it "hits Player 2" do
               allow(subject).to receive(:successfully_hit?) { true }
               subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq npc.current_position
-              expect(npc.health).to be < 100
+              expect(fired_shot.current_position).to eq player_2.current_position
+              expect(player_2.health).to be < 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1
             end
@@ -126,8 +122,8 @@ module Xcommy
             it "misses Player 2" do
               allow(subject).to receive(:successfully_hit?) { false }
               subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq npc.current_position
-              expect(npc.health).to eq 100
+              expect(fired_shot.current_position).to eq player_2.current_position
+              expect(player_2.health).to eq 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1
             end

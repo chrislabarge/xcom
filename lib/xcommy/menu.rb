@@ -13,7 +13,8 @@ module Xcommy
     end
 
     def highlighted_board_object_option
-      @game.npcs[0]
+      # TODO: Update this to make it return objects dynamically
+      @game.players[1]
     end
 
     def show_cursor!
@@ -39,26 +40,30 @@ module Xcommy
         ["Select Spot"]
       when :fire
         options = []
-        @game.npcs.each do |_npc|
-          options << fire_at_player_text
+
+        @game.other_players.each do |other_player|
+          options << fire_at_player_text(other_player)
         end
 
         options << "Cancel"
       when :player_2
-        [fire_at_player_text]
+
+        # TODO - Update this
+        [fire_at_player_text(@game.players[1])]
       when :hit
         # TODO - this should come dynamically from the @game.fired_shot model
-        [fire_at_player_text]
+        [fire_at_player_text(@game.players[1])]
       when :miss
         # TODO - this should come dynamically from the @game.fired_shot model
-        [fire_at_player_text]
+        [fire_at_player_text(@game.players[1])]
       else
         ["Move", "Fire"]
       end
     end
 
-    def fire_at_player_text
-      "Player 2 (#{@game.npcs[0].health})"
+    def fire_at_player_text(player)
+      # TODO - Fix this label (the number 2 should be coming from `player`)
+      "Player 2 (#{player.health})"
     end
   end
 end

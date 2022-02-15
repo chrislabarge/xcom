@@ -21,6 +21,10 @@ module Xcommy
       @hit_damage = 10
     end
 
+    def other_players
+      players - [current_player]
+    end
+
     def turns_left
       2 - @current_turns.count
     end
