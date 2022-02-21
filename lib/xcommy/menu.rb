@@ -1,6 +1,6 @@
 module Xcommy
   class Menu
-    attr_reader :cursor, :game
+    attr_reader :cursor, :game, :current_selection
 
     def initialize(user_interface)
       @user_interface = user_interface
@@ -8,17 +8,28 @@ module Xcommy
       @cursor = MenuCursor.new(self)
     end
 
-    def current_selection
-      options[@cursor.index].gsub(/\s+/, "_").downcase.to_sym
+    def select_option!
+      @current_selection = highlighted_option
+    end
+
+    def current_board_object_selection
+      player_index = @current_selection.to_s[-1].to_i - 1
+      @game.players[player_index]
+    end
+
+    def highlighted_option
+      option = options[@cursor.index].gsub(/\s+/, "_").downcase
+      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['player_2'])
+      (spell_checker.correct(option).first || option).to_sym
     end
 
     def highlighted_board_object_option
-      # TODO: Update this to make it return objects dynamically
-      @game.players[1]
+      player_index = highlighted_option.to_s[-1].to_i - 1
+      @game.players[player_index]
     end
 
     def show_cursor!
-      if current_selection == :fire
+      if @current_selection == :fire
         @game.board.cursor.set_on(
           highlighted_board_object_option.current_position,
         )
@@ -47,23 +58,24 @@ module Xcommy
 
         options << "Cancel"
       when :player_2
-
-        # TODO - Update this
-        [fire_at_player_text(@game.players[1])]
+        [fire_at_player_text(current_board_object_selection)]
       when :hit
-        # TODO - this should come dynamically from the @game.fired_shot model
-        [fire_at_player_text(@game.players[1])]
+        [fire_at_player_text(current_board_object_selection)]
       when :miss
-        # TODO - this should come dynamically from the @game.fired_shot model
-        [fire_at_player_text(@game.players[1])]
+        [fire_at_player_text(current_board_object_selection)]
       else
         ["Move", "Fire"]
       end
     end
 
+    private
+
+    def current_selection_is_a_player_object?
+      @current_selection.to_s.include?("player")
+    end
+
     def fire_at_player_text(player)
-      # TODO - Fix this label (the number 2 should be coming from `player`)
-      "Player 2 (#{player.health})"
+      "#{player.label} (#{player.health})"
     end
   end
 end

@@ -13,9 +13,8 @@ module Xcommy
     def render(turn_option)
       if CinematicScene.types.include?(turn_option.to_sym)
         @cinematic_scene.send(turn_option)
-        @game.current_turns << turn_option
-        #this render turn should be dependent on how many turns left
-        #and extracted out of this function probably.
+
+        @game.take_turn!(turn_option)
         @screen.render(:turn)
       else
         @screen.render(turn_option)
@@ -24,6 +23,10 @@ module Xcommy
 
     def current_screen
       @screen.current
+    end
+
+    def make_selection!
+      @user_interface.menu.select_option!
     end
 
     def current_selection

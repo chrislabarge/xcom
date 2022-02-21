@@ -36,6 +36,7 @@ module Xcommy
     def start
       @board.refresh!
       @display = Display.new self
+
       @current_player = players.first
       render(:turn)
 
@@ -44,6 +45,19 @@ module Xcommy
           render accept_input
         end
       end
+    end
+
+    def take_turn!(turn)
+      @current_turns << turn
+
+      if turns_left == 0
+        @current_player = next_player
+        @current_turns = []
+      end
+    end
+
+    def next_player
+      players[-(players.index(@current_player) + 1)]
     end
 
     def new_fired_shot(at:)
@@ -55,6 +69,7 @@ module Xcommy
     end
 
     def render(screen)
+      #TODO have this all coming from the same area, maybe the Menu class
       spell_checker = DidYouMean::SpellChecker.new(dictionary: ['player_2'])
       parsed_text = spell_checker.correct(screen).first || screen
       @display.render(parsed_text)
@@ -75,6 +90,7 @@ module Xcommy
       when "l"
         @display.change_cursor_position(:right)
       when "\r"
+        @display.make_selection!
         next_screen = @display.current_selection.downcase.to_sym
       when "c"
         exit

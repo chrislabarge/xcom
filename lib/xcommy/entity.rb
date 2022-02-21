@@ -15,6 +15,14 @@ module Xcommy
       show!
     end
 
+    def label
+      "Player #{ordered_number}"
+    end
+
+    def icon
+      "P #{ordered_number}"
+    end
+
     def hide!
       @is_visible = false
     end
@@ -136,6 +144,12 @@ module Xcommy
       end
 
       position
+    end
+
+    private
+
+    def ordered_number
+      @game.players.index(self) + 1
     end
   end
 end

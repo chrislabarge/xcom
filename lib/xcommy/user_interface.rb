@@ -23,7 +23,7 @@ module Xcommy
       @content << interface_top_border
 
       @content << interface_line
-      @content << interface_text_line("Player 1")
+      @content << interface_text_line(@game.current_player.label)
       @content << interface_line
       @content << interface_divider
 

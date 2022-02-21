@@ -19,7 +19,7 @@ module Xcommy
     end
 
     def toggle_static_cursor
-      if @game.display.user_interface.menu.current_selection == :cancel
+      if @game.display.user_interface.menu.highlighted_option == :cancel
         @game.board.cursor.hide!
       else
         @game.board.cursor.set_on(
