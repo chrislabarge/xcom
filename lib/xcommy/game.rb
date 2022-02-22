@@ -16,6 +16,7 @@ module Xcommy
       @npcs = []
       @players = []
       @board = Board.new self
+      @display = Display.new self
       @current_turns = []
       @fired_shot = nil
       @hit_damage = 10
@@ -29,14 +30,16 @@ module Xcommy
       2 - @current_turns.count
     end
 
+    def render(screen)
+      @display.render(screen)
+    end
+
     def current_screen
       @display.current_screen
     end
 
     def start
       @board.refresh!
-      @display = Display.new self
-
       @current_player = players.first
       render(:turn)
 
@@ -66,13 +69,6 @@ module Xcommy
         current_player.current_position,
         at,
       )
-    end
-
-    def render(screen)
-      #TODO have this all coming from the same area, maybe the Menu class
-      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['player_2'])
-      parsed_text = spell_checker.correct(screen).first || screen
-      @display.render(parsed_text)
     end
 
     # what accepting a current screen allows for is to keep track of state

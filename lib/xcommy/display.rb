@@ -37,7 +37,8 @@ module Xcommy
         option = @user_interface.menu.current_selection
 
         unless CinematicScene.types.include?(option)
-          @user_interface.menu.show_cursor!
+          @game.board.show_cursor!
+          @user_interface.menu.cursor.move_to_top!
         end
 
         option

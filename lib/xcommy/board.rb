@@ -14,6 +14,18 @@ module Xcommy
       10
     end
 
+    def show_cursor!
+      if @game.display.user_interface.menu.current_selection == :fire
+        @cursor.set_on(
+          @game.other_players.first.current_position
+        )
+      else
+        @cursor.set_on_center_spot
+      end
+
+      refresh!
+    end
+
     def refresh!
       fill_board!
     end

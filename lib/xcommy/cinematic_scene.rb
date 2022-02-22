@@ -10,7 +10,7 @@ module Xcommy
     end
 
     def self.types
-      [:move_to, :player_2, :hit, :miss]
+      [:move_to, :player_2, :player_1, :hit, :miss]
     end
 
     # Try to make this match Screen where we can call #render and pass in the type

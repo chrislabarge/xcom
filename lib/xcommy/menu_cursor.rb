@@ -4,10 +4,10 @@ module Xcommy
 
     def initialize(menu)
       @menu = menu
-      move_to_top
+      move_to_top!
     end
 
-    def move_to_top
+    def move_to_top!
       @index = 0
     end
 

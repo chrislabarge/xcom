@@ -17,10 +17,11 @@ module Xcommy
       @game.players[player_index]
     end
 
+    # This highlighted option lags right now
+    # I think it is because the options are created after the render?
+
     def highlighted_option
-      option = options[@cursor.index].gsub(/\s+/, "_").downcase
-      spell_checker = DidYouMean::SpellChecker.new(dictionary: ['player_2'])
-      (spell_checker.correct(option).first || option).to_sym
+      (option_key options[@cursor.index].gsub(/\s+/, "_").downcase).to_sym
     end
 
     def highlighted_board_object_option
@@ -28,17 +29,24 @@ module Xcommy
       @game.players[player_index]
     end
 
-    def show_cursor!
-      if @current_selection == :fire
-        @game.board.cursor.set_on(
-          highlighted_board_object_option.current_position,
-        )
+    def option_key(str)
+      if str.include?("player_1")
+        :player_1
+      elsif str.include?("player_2")
+        :player_2
       else
-        @game.board.cursor.set_on_center_spot
+        str
+      end
+    end
+
+    def fire_options
+      options = []
+
+      @game.other_players.each do |other_player|
+        options << fire_at_player_text(other_player)
       end
 
-      @cursor.move_to_top
-      @game.board.refresh!
+      options << "Cancel"
     end
 
     def options
@@ -50,14 +58,10 @@ module Xcommy
       when :move
         ["Select Spot"]
       when :fire
-        options = []
-
-        @game.other_players.each do |other_player|
-          options << fire_at_player_text(other_player)
-        end
-
-        options << "Cancel"
+        fire_options
       when :player_2
+        [fire_at_player_text(current_board_object_selection)]
+      when :player_1
         [fire_at_player_text(current_board_object_selection)]
       when :hit
         [fire_at_player_text(current_board_object_selection)]
