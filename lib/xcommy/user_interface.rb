@@ -71,6 +71,8 @@ module Xcommy
         "Select Player"
       when :player_2
         "Firing..."
+      when :player_1
+        "Firing..."
       when :hit
         "Hit!"
       when :miss

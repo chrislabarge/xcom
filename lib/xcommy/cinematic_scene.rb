@@ -54,6 +54,33 @@ module Xcommy
       @game.fired_shot = nil
     end
 
+    def player_1
+      @game.new_fired_shot(at: @game.players[0])
+
+      while !@game.fired_shot.reached_destination?
+        @game.fired_shot.move_to_next_position!
+        @game.board.refresh!
+
+        @screen.render(:player_1)
+
+        long_sleep
+      end
+
+      @game.fired_shot.hide!
+      @game.board.refresh!
+
+      @screen.render(:player_1)
+
+      long_sleep
+
+      render_player_spot_message(
+        @game.fired_shot.at_player,
+        @game.fired_shot.result,
+      )
+
+      @game.fired_shot = nil
+    end
+
     def render_player_spot_message(player, hit_or_miss)
       render_blinking_player player, hit_or_miss
 
