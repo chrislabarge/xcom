@@ -1,6 +1,7 @@
 module Xcommy
   class Cover
-    attr_reader :position, :type
+    attr_accessor :position
+    attr_reader :type
 
     def initialize(game, spot, type)
       @game = game

@@ -24,6 +24,58 @@ module Xcommy
           subject.mock_input(enter)
         end
 
+        describe "choosing spot that is blocked" do
+          context "by an enemy" do
+            before do
+              subject.other_players.first.current_position = [8, 0]
+              subject.board.refresh!
+
+              4.times { subject.mock_input(down) }
+              5.times { subject.mock_input(left) }
+
+              subject.mock_input(enter)
+            end
+
+            it "alerts to the spot not being available" do
+              expect(subject.display.user_interface.alert_message)
+                .to eq "Spot not available"
+            end
+
+            it "maintains turns left" do
+              expect(subject.turns_left).to eq 2
+            end
+
+            it "maintains move screen" do
+              expect(subject.current_screen).to eq :move
+            end
+          end
+
+          context "by cover" do
+            before do
+              subject.cover.first.position = [8, 0]
+              subject.board.refresh!
+
+              4.times { subject.mock_input(down) }
+              5.times { subject.mock_input(left) }
+
+              subject.mock_input(enter)
+            end
+
+            it "alerts to the spot not being available" do
+              expect(subject.display.user_interface.alert_message)
+                .to eq "Spot not available"
+            end
+
+            it "maintains turns left" do
+              expect(subject.turns_left).to eq 2
+            end
+
+            it "maintains move screen" do
+              expect(subject.current_screen).to eq :move
+            end
+          end
+        end
+
         describe "choosing spot above current position" do
           before do
             3.times { subject.mock_input(down) }
