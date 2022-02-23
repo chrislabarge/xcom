@@ -34,6 +34,9 @@ module Xcommy
         :player_1
       elsif str.include?("player_2")
         :player_2
+      elsif str.include?("play_again")
+        @game.restart!
+        :turn
       else
         str
       end
@@ -67,6 +70,8 @@ module Xcommy
         [fire_at_player_text(current_board_object_selection)]
       when :miss
         [fire_at_player_text(current_board_object_selection)]
+      when :game_over
+        ["Play Again", "Exit"]
       else
         ["Move", "Fire"]
       end

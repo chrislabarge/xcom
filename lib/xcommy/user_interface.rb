@@ -24,17 +24,28 @@ module Xcommy
 
       @content << interface_line
       @content << interface_text_line(@game.current_player.label)
-      @content << interface_line
+
+      if @current_screen == :game_over
+        @content << interface_text_line("WINS!!!")
+      else
+        @content << interface_line
+      end
+
       @content << interface_divider
 
       @content << interface_text_line("Health")
-      @content << interface_text_line("100")
+      @content << interface_text_line(@game.current_player.health.to_s)
       @content << interface_divider
 
       @content << interface_text_line(screen_title)
 
-      @content << interface_text_line("Turn")
-      @content << interface_text_line(turn_display)
+      if @current_screen == :game_over
+        @content << interface_line
+        @content << interface_line
+      else
+        @content << interface_text_line("Turn")
+        @content << interface_text_line(turn_display)
+      end
 
       @menu.options.each do |option|
         @content << interface_divider
@@ -61,6 +72,8 @@ module Xcommy
       case @current_screen
       when :turn
         "Choose Action"
+      when :game_over
+        "Choose To"
       when :move_to
         "Moving..."
       when :move

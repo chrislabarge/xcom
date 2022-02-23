@@ -184,6 +184,7 @@ module Xcommy
 
                     describe "choosing Player 1" do
                       let!(:fired_shot) { subject.new_fired_shot(at: player_1) }
+
                       before do
                         allow(subject).to receive(:fired_shot) { fired_shot }
                       end
@@ -245,13 +246,49 @@ module Xcommy
               allow(subject).to receive(:fired_shot) { fired_shot }
             end
 
-            it "hits Player 2" do
-              allow(subject).to receive(:successfully_hit?) { true }
-              subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq player_2.current_position
-              expect(player_2.health).to be < 100
-              expect(subject.current_screen).to eq :turn
-              expect(subject.turns_left).to eq 1
+            describe "hits player 2" do
+              before do
+                allow(subject).to receive(:successfully_hit?) { true }
+              end
+
+              context "when player 2's health was low" do
+                before do
+                  player_2.health = 10
+                  subject.mock_input(enter)
+                end
+
+                it "kills player 2" do
+                  expect(fired_shot.current_position).to eq player_2.current_position
+                  expect(player_2.health).to eq 0
+                  expect(subject.current_screen).to eq :game_over
+                end
+
+                describe "game over" do
+                  it "starts a new game" do
+                    subject.mock_input(enter)
+                    expect(player_2.health).to eq 100
+                    expect(subject.current_screen).to eq :turn
+                    expect(subject.current_player).to eq player_1
+                  end
+
+                  it "exits the game" do
+                    allow(@game).to receive(:exit)
+                    subject.mock_input(down)
+                    subject.mock_input(enter)
+                    expect(@game).to have_received(:exit)
+                  end
+                end
+              end
+
+              context "when player 2's health was full" do
+                it "reduces health" do
+                  subject.mock_input(enter)
+                  expect(fired_shot.current_position).to eq player_2.current_position
+                  expect(player_2.health).to be < 100
+                  expect(subject.current_screen).to eq :turn
+                  expect(subject.turns_left).to eq 1
+                end
+              end
             end
 
             it "misses Player 2" do

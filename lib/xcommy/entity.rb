@@ -1,6 +1,11 @@
 module Xcommy
   class Entity
-    attr_accessor :health, :current_destination, :current_position, :is_visible, :damage_amount, :miss
+    attr_accessor :health,
+                  :current_destination,
+                  :current_position,
+                  :is_visible,
+                  :damage_amount,
+                  :miss
 
     def duplicate_coords(coords)
       [coords[0], coords[1]]
@@ -8,11 +13,20 @@ module Xcommy
 
     def initialize(game, starting_position)
       @game = game
+      respawn!(starting_position)
+    end
+
+    def respawn!(starting_position)
       @health = 100
       @damage_amount = 0
       @current_position = starting_position
+      # is this clear cache still used?
       clear_turn_cache
       show!
+    end
+
+    def alive?
+      health > 0
     end
 
     def label

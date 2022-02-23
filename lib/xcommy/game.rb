@@ -1,4 +1,5 @@
 require 'io/console'
+
 module Xcommy
   class Game
     attr_accessor :cover,
@@ -34,13 +35,27 @@ module Xcommy
       @display.render(screen)
     end
 
+    def over?
+      !players.all?(&:alive?)
+    end
+
     def current_screen
       @display.current_screen
     end
 
+    def restart!
+      @npcs = []
+      @current_turns = []
+      @cover = Setup.generate_cover(self)
+      @players[0].respawn!([9, 0])
+      @players[1].respawn!([0, 0])
+      @board.refresh!
+      @current_player = @players.first
+    end
+
     def start
       @board.refresh!
-      @current_player = players.first
+      @current_player = @players.first
       render(:turn)
 
       unless Setup.testing?
@@ -87,7 +102,11 @@ module Xcommy
         @display.change_cursor_position(:right)
       when "\r"
         @display.make_selection!
-        next_screen = @display.current_selection.downcase.to_sym
+        if @display.user_interface.menu.current_selection.to_sym == :exit
+          exit
+        else
+          next_screen = @display.current_selection.downcase.to_sym
+        end
       when "c"
         exit
       end

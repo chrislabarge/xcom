@@ -8,7 +8,7 @@ module Xcommy
       @game = Game.new
       @game.npcs = []
       @game.players = [Player.new(@game, [9, 0]), Player.new(@game, [0, 0])]
-      @game.cover = generate_cover
+      @game.cover = self.class.generate_cover(@game)
       @game
     end
 
@@ -16,10 +16,10 @@ module Xcommy
       self.new(options).game
     end
 
-    def generate_cover
+    def self.generate_cover(game)
       coords = []
 
-      if self.class.testing?
+      if testing?
         coords << [8, 3]
         coords << [1, 3]
       else
@@ -28,7 +28,7 @@ module Xcommy
       end
 
       coords.map do |coord|
-        Cover.new(@game, coord, :full_wall)
+        Cover.new(game, coord, :full_wall)
       end
     end
 

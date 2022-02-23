@@ -15,7 +15,12 @@ module Xcommy
         @cinematic_scene.send(turn_option)
 
         @game.take_turn!(turn_option)
-        @screen.render(:turn)
+
+        if @game.over?
+          @screen.render(:game_over)
+        else
+          @screen.render(:turn)
+        end
       else
         @screen.render(turn_option)
       end
