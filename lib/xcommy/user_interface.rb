@@ -9,63 +9,64 @@ module Xcommy
     end
 
     def render(current_screen)
-      @content = []
       @current_screen = current_screen
       build!
-      @content
     end
 
     def refresh_alert_message!
       @alert_message = nil
     end
 
-    def build!
-      @content << interface_top_border
+    private
 
-      @content << interface_line
-      @content << interface_text_line(@game.current_player.label)
+    def build!
+      content = []
+      content << interface_top_border
+
+      content << interface_line
+      content << interface_text_line(@game.current_player.label)
 
       if @current_screen == :game_over
-        @content << interface_text_line("WINS!!!")
+        content << interface_text_line("WINS!!!")
       else
-        @content << interface_line
+        content << interface_line
       end
 
-      @content << interface_divider
+      content << interface_divider
 
-      @content << interface_text_line("Health")
-      @content << interface_text_line(@game.current_player.health.to_s)
-      @content << interface_divider
+      content << interface_text_line("Health")
+      content << interface_text_line(@game.current_player.health.to_s)
+      content << interface_divider
 
-      @content << interface_text_line(screen_title)
+      content << interface_text_line(screen_title)
 
       if @current_screen == :game_over
-        @content << interface_line
-        @content << interface_line
+        content << interface_line
+        content << interface_line
       else
-        @content << interface_text_line("Turn")
-        @content << interface_text_line(turn_display)
+        content << interface_text_line("Turn")
+        content << interface_text_line(turn_display)
       end
 
       @menu.items.each do |menu_item|
-        @content << interface_divider
-        @content << interface_text_line(
+        content << interface_divider
+        content << interface_text_line(
           menu_item,
           cursor: @menu.items[@menu.cursor.index] == menu_item,
         )
       end
 
       unless @alert_message.nil?
-        @content << interface_text_line(@alert_message)
+        content << interface_text_line(@alert_message)
       end
 
-      @content << interface_divider
+      content << interface_divider
 
       number_of_empty_interface_lines.times do
-        @content << interface_line
+        content << interface_line
       end
 
-      @content << interface_bottom_border
+      content << interface_bottom_border
     end
 
     def screen_title

@@ -23,9 +23,7 @@ module Xcommy
 
     def show_cursor!
       if @game.display.user_interface.menu.fire_currently_selected?
-        @cursor.set_on(
-          @game.other_players.first.current_position
-        )
+        @cursor.set_on @game.other_players.first.current_position
       else
         @cursor.set_on_center_spot
       end
@@ -34,7 +32,7 @@ module Xcommy
     end
 
     def refresh!
-      fill_board!
+      generate_data!
     end
 
     def toggle_static_cursor
@@ -42,7 +40,11 @@ module Xcommy
         @game.board.cursor.hide!
       else
         @game.board.cursor.set_on(
-          @game.display.user_interface.menu.highlighted_player_object.current_position,
+          @game
+            .display
+            .user_interface
+            .menu.highlighted_player_object
+            .current_position,
         )
       end
 
@@ -51,24 +53,28 @@ module Xcommy
 
     def render
       rows = []
-      rows << Array.new(self.class.spot_length, "_____").join + "_"
+      rows << top_line
+
       self.class.spot_length.times do |outer_index|
-        top = []
-        bottom = []
-
-        self.class.spot_length.times do |inner_index|
-          spot_type = find_spot_type [outer_index, inner_index]
-          top << Spot.for(:top, spot_type).to_s
-          bottom << Spot.for(:bottom, spot_type).to_s
-        end
-
-        rows << top.join + "|"
-        rows << bottom.join + "|"
+        rows << row_of_spots(:top, outer_index) + "|"
+        rows << row_of_spots(:bottom, outer_index) + "|"
       end
+
       rows
     end
 
     private
+
+    def row_of_spots(axis, outer_index)
+      content = []
+
+      self.class.spot_length.times do |inner_index|
+        spot_type = find_spot_type [outer_index, inner_index]
+        content << Spot.for(axis, spot_type).to_s
+      end
+
+      content.join
+    end
 
     def find_spot_type(spot_coords)
       board_spot = @data[spot_coords[0]][spot_coords[1]]
@@ -78,7 +84,7 @@ module Xcommy
       board_spot || @cursor.spot_display_type(spot_coords)
     end
 
-    def fill_board!
+    def generate_data!
       self.class.spot_length.times do |index|
         @data[index] = {}
       end
@@ -114,6 +120,10 @@ module Xcommy
         fired_shot_coords = @game.fired_shot.current_position
         @data[fired_shot_coords[0]][fired_shot_coords[1]] = :fired_shot
       end
+    end
+
+    def top_line
+      Array.new(self.class.spot_length, "_____").join + "_"
     end
   end
 end

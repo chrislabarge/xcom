@@ -5,11 +5,11 @@ module Xcommy
     end
 
     def game
-      @game = Game.new
-      @game.npcs = []
-      @game.players = [Player.new(@game, [9, 0]), Player.new(@game, [0, 0])]
-      @game.cover = self.class.generate_cover(@game)
-      @game
+      game = Game.new
+      game.npcs = []
+      game.players = [Player.new(game, [9, 0]), Player.new(game, [0, 0])]
+      game.cover = self.class.generate_cover(game)
+      game
     end
 
     def self.new_game(options = {})

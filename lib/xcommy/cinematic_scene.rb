@@ -28,57 +28,11 @@ module Xcommy
     end
 
     def player_2
-      @game.current_player.fire_shot(at: @game.players[1])
-
-      while !@game.fired_shot.reached_destination?
-        @game.fired_shot.move_to_next_position!
-        @game.board.refresh!
-
-        @screen.render(:player_2)
-
-        long_sleep
-      end
-
-      @game.fired_shot.hide!
-      @game.board.refresh!
-
-      @screen.render(:player_2)
-
-      long_sleep
-
-      render_player_spot_message(
-        @game.fired_shot.at_player,
-        @game.fired_shot.result,
-      )
-
-      @game.fired_shot = nil
+      fired_shot(@game.other_players[0], :player_2)
     end
 
     def player_1
-      @game.current_player.fire_shot(at: @game.players[0])
-
-      while !@game.fired_shot.reached_destination?
-        @game.fired_shot.move_to_next_position!
-        @game.board.refresh!
-
-        @screen.render(:player_1)
-
-        long_sleep
-      end
-
-      @game.fired_shot.hide!
-      @game.board.refresh!
-
-      @screen.render(:player_1)
-
-      long_sleep
-
-      render_player_spot_message(
-        @game.fired_shot.at_player,
-        @game.fired_shot.result,
-      )
-
-      @game.fired_shot = nil
+      fired_shot(@game.other_players[0], :player_1)
     end
 
     def render_player_spot_message(player, hit_or_miss)
@@ -132,5 +86,43 @@ module Xcommy
         end
       )
     end
+
+    private
+
+    def fired_shot(receiving_entity, type)
+      @game.fired_shot = @game.current_player.fire_shot(at: receiving_entity)
+
+      while !@game.fired_shot.reached_destination?
+        advance_and_render_fired_shot(type)
+      end
+
+      render_fired_shot_outcome(type)
+
+      @game.fired_shot = nil
+    end
+
+    def render_fired_shot_outcome(type)
+      @game.fired_shot.hide!
+      @game.board.refresh!
+
+      @screen.render(type)
+
+      long_sleep
+
+      render_player_spot_message(
+        @game.fired_shot.at_player,
+        @game.fired_shot.result,
+      )
+    end
+
+    def advance_and_render_fired_shot(type)
+      @game.fired_shot.move_to_next_position!
+      @game.board.refresh!
+
+      @screen.render(type)
+
+      long_sleep
+    end
+
   end
 end
