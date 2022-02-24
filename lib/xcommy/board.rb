@@ -31,11 +31,11 @@ module Xcommy
     end
 
     def toggle_static_cursor
-      if @game.display.user_interface.menu.highlighted_option == :cancel
+      if @game.display.user_interface.menu.cancel_item_highlighted?
         @game.board.cursor.hide!
       else
         @game.board.cursor.set_on(
-          @game.display.user_interface.menu.highlighted_board_object_option.current_position,
+          @game.display.user_interface.menu.highlighted_player_object.current_position,
         )
       end
 

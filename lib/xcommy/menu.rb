@@ -8,28 +8,59 @@ module Xcommy
       @cursor = MenuCursor.new(self)
     end
 
-    def select_option!
-      @current_selection = highlighted_option
+    def select_highlighted_item!
+      @current_selection = highlighted_item
     end
 
-    def current_board_object_selection
-      player_index = @current_selection.to_s[-1].to_i - 1
+    def cancel_item_highlighted?
+      highlighted_item == :cancel
+    end
+
+    def highlighted_player_object
+      find_player_object highlighted_item
+    end
+
+    def items
+      case @user_interface.current_screen
+      when :spot
+        ["Move To", "Cancel"]
+      when :move_to
+        ["Move To"]
+      when :move
+        ["Select Spot"]
+      when :fire
+        fire_items
+      when :player_2
+        [fire_at_player_text(currently_selected_player_object)]
+      when :player_1
+        [fire_at_player_text(currently_selected_player_object)]
+      when :hit
+        [fire_at_player_text(currently_selected_player_object)]
+      when :miss
+        [fire_at_player_text(currently_selected_player_object)]
+      when :game_over
+        ["Play Again", "Exit"]
+      else
+        ["Move", "Fire"]
+      end
+    end
+
+    private
+
+    def highlighted_item
+      (item_key items[@cursor.index].gsub(/\s+/, "_").downcase).to_sym
+    end
+
+    def currently_selected_player_object
+      find_player_object @current_selection
+    end
+
+    def find_player_object(player_menu_item)
+      player_index = player_menu_item.to_s[-1].to_i - 1
       @game.players[player_index]
     end
 
-    # This highlighted option lags right now
-    # I think it is because the options are created after the render?
-
-    def highlighted_option
-      (option_key options[@cursor.index].gsub(/\s+/, "_").downcase).to_sym
-    end
-
-    def highlighted_board_object_option
-      player_index = highlighted_option.to_s[-1].to_i - 1
-      @game.players[player_index]
-    end
-
-    def option_key(str)
+    def item_key(str)
       if str.include?("player_1")
         :player_1
       elsif str.include?("player_2")
@@ -42,45 +73,18 @@ module Xcommy
       end
     end
 
-    def fire_options
-      options = []
-
-      @game.other_players.each do |other_player|
-        options << fire_at_player_text(other_player)
-      end
-
-      options << "Cancel"
-    end
-
-    def options
-      case @user_interface.current_screen
-      when :spot
-        ["Move To", "Cancel"]
-      when :move_to
-        ["Move To"]
-      when :move
-        ["Select Spot"]
-      when :fire
-        fire_options
-      when :player_2
-        [fire_at_player_text(current_board_object_selection)]
-      when :player_1
-        [fire_at_player_text(current_board_object_selection)]
-      when :hit
-        [fire_at_player_text(current_board_object_selection)]
-      when :miss
-        [fire_at_player_text(current_board_object_selection)]
-      when :game_over
-        ["Play Again", "Exit"]
-      else
-        ["Move", "Fire"]
-      end
-    end
-
-    private
-
     def current_selection_is_a_player_object?
       @current_selection.to_s.include?("player")
+    end
+
+    def fire_items
+      items = []
+
+      @game.other_players.each do |other_player|
+        items << fire_at_player_text(other_player)
+      end
+
+      items << "Cancel"
     end
 
     def fire_at_player_text(player)

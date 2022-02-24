@@ -101,7 +101,7 @@ module Xcommy
       when "l"
         @display.change_cursor_position(:right)
       when "\r"
-        @display.make_selection!
+        @display.user_interface.menu.select_highlighted_item!
         if @display.user_interface.menu.current_selection.to_sym == :exit
           exit
         else

@@ -47,11 +47,11 @@ module Xcommy
         @content << interface_text_line(turn_display)
       end
 
-      @menu.options.each do |option|
+      @menu.items.each do |menu_item|
         @content << interface_divider
         @content << interface_text_line(
-          option,
-          cursor: @menu.options[@menu.cursor.index] == option,
+          menu_item,
+          cursor: @menu.items[@menu.cursor.index] == menu_item,
         )
       end
 
@@ -94,7 +94,7 @@ module Xcommy
     end
 
     def number_of_empty_interface_lines
-      count = (8 - (@menu.options.count * 2))
+      count = (8 - (@menu.items.count * 2))
       count -= 1 unless @alert_message.nil?
       count
     end

@@ -14,12 +14,12 @@ module Xcommy
     def move_in(direction)
       if direction == :down
         if @index == 0
-          @index = @menu.options.count - 1
+          @index = @menu.items.count - 1
         else
           @index -= 1
         end
       else
-        if @index == @menu.options.count - 1
+        if @index == @menu.items.count - 1
           @index = 0
         else
           @index += 1

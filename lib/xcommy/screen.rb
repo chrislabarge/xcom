@@ -5,16 +5,15 @@ module Xcommy
   class Screen
     attr_accessor :current
 
-    def initialize(game, user_interface)
+    def initialize(game)
       @game = game
-      @user_interface = user_interface
     end
 
     def spot_screen
       if @game.board.cursor.spot.nil?
         :spot
       else
-        @user_interface.alert_message = "Spot not available"
+        @game.display.user_interface.alert_message = "Spot not available"
         :move
       end
     end
@@ -35,7 +34,7 @@ module Xcommy
       content << boarder_horizontal
       content << merge_components(
         @game.board.render,
-        @user_interface.render(@current),
+        @game.display.user_interface.render(@current),
       )
       content << blank_line
       content << boarder_horizontal

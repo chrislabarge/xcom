@@ -3,10 +3,11 @@ module Xcommy
     attr_accessor :user_interface
     attr_reader :game
 
+    # What is this class really responsible for?
     def initialize(game)
       @game = game
       @user_interface = UserInterface.new(@game)
-      @screen = Screen.new(@game, @user_interface)
+      @screen = Screen.new(@game)
       @cinematic_scene = CinematicScene.new(@game, @screen)
     end
 
@@ -28,10 +29,6 @@ module Xcommy
 
     def current_screen
       @screen.current
-    end
-
-    def make_selection!
-      @user_interface.menu.select_option!
     end
 
     def current_selection
