@@ -28,7 +28,7 @@ module Xcommy
     end
 
     def player_2
-      @game.new_fired_shot(at: @game.players[1])
+      @game.current_player.fire_shot(at: @game.players[1])
 
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!
@@ -55,7 +55,7 @@ module Xcommy
     end
 
     def player_1
-      @game.new_fired_shot(at: @game.players[0])
+      @game.current_player.fire_shot(at: @game.players[0])
 
       while !@game.fired_shot.reached_destination?
         @game.fired_shot.move_to_next_position!

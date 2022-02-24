@@ -12,6 +12,14 @@ module Xcommy
       @current_selection = highlighted_item
     end
 
+    def exit_currently_selected?
+      @current_selection == :exit
+    end
+
+    def fire_currently_selected?
+      @current_selection == :fire
+    end
+
     def cancel_item_highlighted?
       highlighted_item == :cancel
     end
@@ -71,10 +79,6 @@ module Xcommy
       else
         str
       end
-    end
-
-    def current_selection_is_a_player_object?
-      @current_selection.to_s.include?("player")
     end
 
     def fire_items

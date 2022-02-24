@@ -235,14 +235,14 @@ module Xcommy
                     end
 
                     describe "choosing Player 1" do
-                      let!(:fired_shot) { subject.new_fired_shot(at: player_1) }
+                      let!(:fired_shot) { player_2.fire_shot(at: player_1) }
 
                       before do
                         allow(subject).to receive(:fired_shot) { fired_shot }
                       end
 
                       it "hits Player 1" do
-                        allow(subject).to receive(:successfully_hit?) { true }
+                        allow(fired_shot).to receive(:successfully_hit?) { true }
                         subject.mock_input(enter)
                         expect(fired_shot.current_position).to eq player_1.current_position
                         expect(player_1.health).to be < 100
@@ -251,7 +251,7 @@ module Xcommy
                       end
 
                       it "misses Player 1" do
-                        allow(subject).to receive(:successfully_hit?) { false }
+                        allow(fired_shot).to receive(:successfully_hit?) { false }
                         subject.mock_input(enter)
                         expect(fired_shot.current_position)
                           .to eq player_1.current_position
@@ -292,7 +292,7 @@ module Xcommy
 
           describe "choosing Player 2" do
             let!(:player_2) { subject.players[1] }
-            let!(:fired_shot) { subject.new_fired_shot(at: player_2) }
+            let!(:fired_shot) { player_1.fire_shot(at: player_2) }
 
             before do
               allow(subject).to receive(:fired_shot) { fired_shot }
@@ -300,7 +300,7 @@ module Xcommy
 
             describe "hits player 2" do
               before do
-                allow(subject).to receive(:successfully_hit?) { true }
+                allow(fired_shot).to receive(:successfully_hit?) { true }
               end
 
               context "when player 2's health was low" do
@@ -335,7 +335,8 @@ module Xcommy
               context "when player 2's health was full" do
                 it "reduces health" do
                   subject.mock_input(enter)
-                  expect(fired_shot.current_position).to eq player_2.current_position
+                  expect(fired_shot.current_position)
+                    .to eq player_2.current_position
                   expect(player_2.health).to be < 100
                   expect(subject.current_screen).to eq :turn
                   expect(subject.turns_left).to eq 1
@@ -344,9 +345,10 @@ module Xcommy
             end
 
             it "misses Player 2" do
-              allow(subject).to receive(:successfully_hit?) { false }
+              allow(fired_shot).to receive(:successfully_hit?) { false }
               subject.mock_input(enter)
-              expect(fired_shot.current_position).to eq player_2.current_position
+              expect(fired_shot.current_position)
+                .to eq player_2.current_position
               expect(player_2.health).to eq 100
               expect(subject.current_screen).to eq :turn
               expect(subject.turns_left).to eq 1

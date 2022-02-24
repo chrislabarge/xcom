@@ -10,12 +10,19 @@ module Xcommy
       @cursor = BoardCursor.new(self)
     end
 
+    def self.distance_between(spot1, spot2)
+      y = spot1[0] - spot2[0]
+      x = spot1[1] - spot2[1]
+
+      y.abs + x.abs
+    end
+
     def self.spot_length
       10
     end
 
     def show_cursor!
-      if @game.display.user_interface.menu.current_selection == :fire
+      if @game.display.user_interface.menu.fire_currently_selected?
         @cursor.set_on(
           @game.other_players.first.current_position
         )

@@ -73,10 +73,6 @@ module Xcommy
       @damage_amount = 0
     end
 
-    def fire_at!(entity)
-      @game.firing_outcome(self, entity)
-    end
-
     def move_to!(position)
       @current_position = position
     end
@@ -86,7 +82,9 @@ module Xcommy
     end
 
     def closest_cover
-      @game.closest_cover_to(current_position)
+      @game.cover.min_by do |cover_instance|
+        Board.distance_between cover_instance.position, current_position
+      end
     end
 
     def in_the_open?
