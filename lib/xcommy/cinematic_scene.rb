@@ -1,22 +1,27 @@
 module Xcommy
   class CinematicScene
     LONG_SLEEP = 0.5
-    SHORT_SLEEP = 0.35
-    TESTING_SLEEP = 0.0
+    SHORT_SLEEP = 0.25
+    TESTING_SLEEP = 0
+
+    def self.types
+      [:move_to, :player_2, :player_1, :hit, :miss]
+    end
 
     def initialize(game, screen)
       @game = game
       @screen = screen
     end
 
-    def self.types
-      [:move_to, :player_2, :player_1, :hit, :miss]
+    def render(screen_type)
+      send(screen_type)
     end
 
-    # Try to make this match Screen where we can call #render and pass in the type
+    private
 
     def move_to
       @game.current_player.current_destination = @game.board.cursor.coords
+
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
         @game.board.refresh!
@@ -35,59 +40,15 @@ module Xcommy
       fired_shot(@game.other_players[0], :player_1)
     end
 
-    def render_player_spot_message(player, hit_or_miss)
-      render_blinking_player player, hit_or_miss
-
-      2.times do
-        player.send("#{hit_or_miss}!")
-        @game.board.refresh!
-        @screen.render(hit_or_miss)
-        short_sleep
-
-        player.send("reset_#{hit_or_miss}!")
-
-        player.show!
-        @game.board.refresh!
-        @screen.render(hit_or_miss)
-        short_sleep
-      end
-
-      render_blinking_player player, hit_or_miss
-    end
-
-    def render_blinking_player(player, screen_type)
-      player.hide!
-      @game.board.refresh!
-      @screen.render(screen_type)
-      short_sleep
-
-      player.show!
-      @game.board.refresh!
-      @screen.render(screen_type)
-      short_sleep
+    def short_sleep
+      length = Setup.testing? ? TESTING_SLEEP : SHORT_SLEEP
+      sleep length
     end
 
     def long_sleep
-      sleep(
-        if Setup.testing?
-          TESTING_SLEEP
-        else
-          LONG_SLEEP
-        end
-      )
+      length = Setup.testing? ? TESTING_SLEEP : LONG_SLEEP
+      sleep length
     end
-
-    def short_sleep
-      sleep(
-        if Setup.testing?
-          TESTING_SLEEP
-        else
-          SHORT_SLEEP
-        end
-      )
-    end
-
-    private
 
     def fired_shot(receiving_entity, type)
       @game.fired_shot = @game.current_player.fire_shot(at: receiving_entity)
@@ -124,5 +85,39 @@ module Xcommy
       long_sleep
     end
 
+    def render_player_spot_message(player, hit_or_miss)
+      render_blinking_player player, hit_or_miss
+
+      2.times do
+        player.send("#{hit_or_miss}!")
+        @game.board.refresh!
+        @screen.render(hit_or_miss)
+        short_sleep
+
+        #Sending a "hit" to a entity sort of makes sense
+        # Sending a "miss" to a entity.. is kind of odd.
+        # Why would the entity model need to keep track of a miss
+        player.send("reset_#{hit_or_miss}!")
+
+        player.show!
+        @game.board.refresh!
+        @screen.render(hit_or_miss)
+        short_sleep
+      end
+
+      render_blinking_player player, hit_or_miss
+    end
+
+    def render_blinking_player(player, screen_type)
+      player.hide!
+      @game.board.refresh!
+      @screen.render(screen_type)
+      short_sleep
+
+      player.show!
+      @game.board.refresh!
+      @screen.render(screen_type)
+      short_sleep
+    end
   end
 end

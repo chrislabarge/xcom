@@ -29,6 +29,8 @@ module Xcommy
       rand(1..100) <= actual_hit_chance_percentage + handicap
     end
 
+    private
+
     def miss_chance_percentage
       distance = Board.distance_between(
         @game.current_player.current_position,

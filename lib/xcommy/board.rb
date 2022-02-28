@@ -31,6 +31,10 @@ module Xcommy
       refresh!
     end
 
+    def cursor_spot
+      @data[@cursor.coords[0]][@cursor.coords[1]]
+    end
+
     def refresh!
       generate_data!
     end
@@ -100,6 +104,19 @@ module Xcommy
         @data[cover_coords[0]][cover_coords[1]] = cover.type
       end
 
+      # insert_legacy_npc
+
+      unless @game.fired_shot.nil? || !@game.fired_shot.visible?
+        fired_shot_coords = @game.fired_shot.current_position
+        @data[fired_shot_coords[0]][fired_shot_coords[1]] = :fired_shot
+      end
+    end
+
+    def top_line
+      Array.new(self.class.spot_length, "_____").join + "_"
+    end
+
+    def insert_legacy_npc
       @game.npcs.each_with_index do |npc, index|
         next unless npc.visible?
 
@@ -115,15 +132,6 @@ module Xcommy
             "player_#{index + 2}"
           end
       end
-
-      unless @game.fired_shot.nil? || !@game.fired_shot.visible?
-        fired_shot_coords = @game.fired_shot.current_position
-        @data[fired_shot_coords[0]][fired_shot_coords[1]] = :fired_shot
-      end
-    end
-
-    def top_line
-      Array.new(self.class.spot_length, "_____").join + "_"
     end
   end
 end

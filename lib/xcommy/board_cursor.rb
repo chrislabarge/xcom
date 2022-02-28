@@ -12,11 +12,6 @@ module Xcommy
       [:move, :spot, :fire].include? @game.display.current_screen
     end
 
-    def spot
-      @board.data[@coords[0]][@coords[1]]
-    end
-
-    # Not being used
     def set_on_center_spot
       @coords = [4, 5]
     end

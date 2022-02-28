@@ -14,6 +14,7 @@ module Xcommy
         return true if inline_with?(spot1, spot2, alignment_type) &&
           between?(spot1, spot2, alignment_type)
       end
+
       false
     end
 

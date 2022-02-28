@@ -10,7 +10,7 @@ module Xcommy
     end
 
     def spot_screen
-      if @game.board.cursor.spot.nil?
+      if @game.board.cursor_spot.nil?
         :spot
       else
         @game.display.user_interface.alert_message = "Spot not available"
@@ -18,13 +18,8 @@ module Xcommy
       end
     end
 
-    def set_current(screen_type)
-      type = screen_type.to_sym
-      type = :turn if type == :cancel
-      @current = type
-    end
-
     def render(screen_type)
+      # TODO: Why is this needed?
       set_current screen_type
       content = []
 
@@ -40,7 +35,23 @@ module Xcommy
       content << boarder_horizontal
       content << blank_line
 
-      show! content
+      puts content
+    end
+
+    private
+
+    def set_current(screen_type)
+      type = screen_type.to_sym
+      type = :turn if type == :cancel
+      @current = type
+    end
+
+    def boarder_horizontal
+      Array.new(85, "=").join
+    end
+
+    def blank_line
+      print ""
     end
 
     def merge_components(playing_board, user_interface)
@@ -58,18 +69,6 @@ module Xcommy
       end
 
       merger
-    end
-
-    def blank_line
-      print ""
-    end
-
-    def boarder_horizontal
-      Array.new(85, "=").join
-    end
-
-    def show!(content)
-      puts content
     end
   end
 end

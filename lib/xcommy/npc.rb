@@ -1,8 +1,16 @@
 module Xcommy
   class NPC < Entity
-    def take_turn!
-      clear_turn_cache if @turns.count == 2
+    def missed?
+      @miss == true
+    end
 
+    def closest_cover
+      @game.cover.min_by do |cover_instance|
+        Board.distance_between cover_instance.position, current_position
+      end
+    end
+
+    def take_turn!
       if first_turn? && exposed?
         set_current_destination
         move_to!(next_position)
@@ -11,8 +19,13 @@ module Xcommy
       end
     end
 
+    def first_turn?
+      @game.turns_left == 2
+    end
+
     def best_player_to_hit
       @game.players.max_by do |player|
+        # I moved this into Fired Shot.. will not longer work.
         @game.hit_chance_percentage(self, player)
       end
     end

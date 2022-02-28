@@ -13,7 +13,7 @@ module Xcommy
 
     def render(turn_option)
       if CinematicScene.types.include?(turn_option.to_sym)
-        @cinematic_scene.send(turn_option)
+        @cinematic_scene.render(turn_option)
 
         @game.take_turn!(turn_option)
 
