@@ -1,46 +1,35 @@
 module Xcommy
-  # This board + User interface should all come from this call
-  # The screen just glues them together
-  # This model should really be called "screen builder" dependent on how I store state
   class Screen
     attr_accessor :current
 
-    def initialize(game)
-      @game = game
-    end
-
-    def spot_screen
-      if @game.board.cursor_spot.nil?
-        :spot
-      else
-        @game.display.user_interface.alert_message = "Spot not available"
-        :move
-      end
+    def initialize(board, user_interface)
+      @board = board
+      @user_interface = user_interface
     end
 
     def render(screen_type)
-      # TODO: Why is this needed?
-      set_current screen_type
-      content = []
-
-      5.times do
-        content << blank_line
-      end
-      content << boarder_horizontal
-      content << merge_components(
-        @game.board.render,
-        @game.display.user_interface.render(@current),
-      )
-      content << blank_line
-      content << boarder_horizontal
-      content << blank_line
-
+      set_current_screen_type screen_type
       puts content
     end
 
     private
 
-    def set_current(screen_type)
+    def content
+      screen_lines = []
+
+      5.times do
+        screen_lines << blank_line
+      end
+
+      screen_lines << boarder_horizontal
+      screen_lines << merge_components
+      screen_lines << blank_line
+      screen_lines << boarder_horizontal
+      screen_lines << blank_line
+      screen_lines
+    end
+
+    def set_current_screen_type(screen_type)
       type = screen_type.to_sym
       type = :turn if type == :cancel
       @current = type
@@ -54,18 +43,20 @@ module Xcommy
       print ""
     end
 
-    def merge_components(playing_board, user_interface)
+    def merge_components
+      board_rows = @board.render
+      user_interface_rows = @user_interface.for_screen_type(@current)
       merger = []
 
-      playing_board.each_with_index do |display_line, index|
+      board_rows.each_with_index do |board_display_line, index|
         connector =
-          if index == 0 || index == (playing_board.count - 1)
+          if index == 0 || index == (board_rows.count - 1)
             "_"
           else
             " "
           end
 
-        merger[index] = "   " + display_line + connector + user_interface[index]
+        merger[index] = "   " + board_display_line + connector + user_interface_rows[index]
       end
 
       merger

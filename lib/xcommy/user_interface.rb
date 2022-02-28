@@ -8,8 +8,8 @@ module Xcommy
       refresh_alert_message!
     end
 
-    def render(current_screen)
-      @current_screen = current_screen
+    def for_screen_type(current_screen_type)
+      @current_screen = current_screen_type
       build!
     end
 

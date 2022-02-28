@@ -7,7 +7,7 @@ module Xcommy
     def initialize(game)
       @game = game
       @user_interface = UserInterface.new(@game)
-      @screen = Screen.new(@game)
+      @screen = Screen.new(@game.board, @user_interface)
       @cinematic_scene = CinematicScene.new(@game, @screen)
     end
 
@@ -33,8 +33,7 @@ module Xcommy
 
     def current_selection
       if current_screen == :move
-        @user_interface.refresh_alert_message!
-        @screen.spot_screen
+        spot_screen
       else
         option = @user_interface.menu.current_selection
 
@@ -56,6 +55,19 @@ module Xcommy
 
       if current_screen == :fire
         @game.board.toggle_static_cursor
+      end
+    end
+
+    private
+
+    def spot_screen
+      @user_interface.refresh_alert_message!
+
+      if @game.board.cursor_spot.nil?
+        :spot
+      else
+        @user_interface.alert_message = "Spot not available"
+        :move
       end
     end
   end
