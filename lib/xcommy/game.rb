@@ -26,26 +26,6 @@ module Xcommy
       players - [current_player]
     end
 
-    # See if makes sense to remove this
-    def turns_left
-      @current_player.turns_left
-    end
-
-    def render(screen_type)
-      if CinematicScene.types.include?(screen_type.to_sym)
-        CinematicScene.new(self).render(screen_type)
-        take_turn!
-
-        screen_type = over? ? :game_over : :turn
-      end
-
-      Screen.new(self).render(screen_type)
-    end
-
-    def over?
-      !players.all?(&:alive?)
-    end
-
     def restart!
       @npcs = []
       @cover = Setup.generate_cover(self)
@@ -67,47 +47,26 @@ module Xcommy
       end
     end
 
-    def take_turn!
-      @current_player.turns_left -= 1
-
-      if @current_player.turns_left.zero?
-        @current_player = next_player
-        @current_player.reset_turns_left!
-      end
-    end
-
-    # what accepting a current screen allows for is to keep track of state
-    # I think what I should be doing instead is the opposite. Just re-render
-    # by default and "refresh" what input is selected/entered by the user
-    def accept_input(input = STDIN.getch)
-      next_screen = nil
-      case input
-      when "j"
-        change_cursor_position(:down)
-      when "k"
-        change_cursor_position(:up)
-      when "h"
-        change_cursor_position(:left)
-      when "l"
-        change_cursor_position(:right)
-      when "\r"
-        @user_interface.menu.select_highlighted_item!
-        if @user_interface.menu.exit_currently_selected?
-          exit
-        else
-          next_screen = current_selection.downcase.to_sym
-        end
-      when "c"
-        exit
-      end
-      next_screen || @current_screen
-    end
-
     def mock_input(input)
       render accept_input(input)
     end
 
     private
+
+    def render(screen_type)
+      if CinematicScene.types.include?(screen_type.to_sym)
+        CinematicScene.new(self).render(screen_type)
+        take_turn!
+
+        screen_type = over? ? :game_over : :turn
+      end
+
+      Screen.new(self).render(screen_type)
+    end
+
+    def over?
+      !players.all?(&:alive?)
+    end
 
     def change_cursor_position(direction)
       if @current_screen == :move
@@ -149,6 +108,42 @@ module Xcommy
 
     def next_player
       players[-(players.index(@current_player) + 1)]
+    end
+
+    def take_turn!
+      @current_player.turns_left -= 1
+
+      if @current_player.turns_left.zero?
+        @current_player = next_player
+        @current_player.reset_turns_left!
+      end
+    end
+
+    # what accepting a current screen allows for is to keep track of state
+    # I think what I should be doing instead is the opposite. Just re-render
+    # by default and "refresh" what input is selected/entered by the user
+    def accept_input(input = STDIN.getch)
+      next_screen = nil
+      case input
+      when "j"
+        change_cursor_position(:down)
+      when "k"
+        change_cursor_position(:up)
+      when "h"
+        change_cursor_position(:left)
+      when "l"
+        change_cursor_position(:right)
+      when "\r"
+        @user_interface.menu.select_highlighted_item!
+        if @user_interface.menu.exit_currently_selected?
+          exit
+        else
+          next_screen = current_selection.downcase.to_sym
+        end
+      when "c"
+        exit
+      end
+      next_screen || @current_screen
     end
   end
 end

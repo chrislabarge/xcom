@@ -20,7 +20,8 @@ module Xcommy
     end
 
     def first_turn?
-      @game.turns_left == 2
+      # This @turns_left will need to be extracted out of the Player class
+      @turns_left == 2
     end
 
     def best_player_to_hit

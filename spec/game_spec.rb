@@ -42,7 +42,7 @@ module Xcommy
             end
 
             it "maintains turns left" do
-              expect(subject.turns_left).to eq 2
+              expect(subject.current_player.turns_left).to eq 2
             end
 
             it "maintains move screen" do
@@ -67,7 +67,7 @@ module Xcommy
             end
 
             it "maintains turns left" do
-              expect(subject.turns_left).to eq 2
+              expect(subject.current_player.turns_left).to eq 2
             end
 
             it "maintains move screen" do
@@ -94,7 +94,7 @@ module Xcommy
             end
 
             it "maintains turns left" do
-              expect(subject.turns_left).to eq 2
+              expect(subject.current_player.turns_left).to eq 2
             end
           end
 
@@ -114,7 +114,7 @@ module Xcommy
 
               it "subtracts a turn" do
                 # This turns left will have to be rethought
-                expect(subject.turns_left).to eq 1
+                expect(subject.current_player.turns_left).to eq 1
               end
             end
 
@@ -163,7 +163,7 @@ module Xcommy
                       end
 
                       it "maintains turns left" do
-                        expect(subject.turns_left).to eq 2
+                        expect(subject.current_player.turns_left).to eq 2
                       end
                     end
 
@@ -182,7 +182,7 @@ module Xcommy
                         end
 
                         it "subtracts a turn" do
-                          expect(subject.turns_left).to eq 1
+                          expect(subject.current_player.turns_left).to eq 1
                         end
                       end
 
@@ -230,7 +230,7 @@ module Xcommy
                       end
 
                       it "maintains turns left" do
-                        expect(subject.turns_left).to eq 2
+                        expect(subject.current_player.turns_left).to eq 2
                       end
                     end
 
@@ -247,7 +247,7 @@ module Xcommy
                         expect(fired_shot.current_position).to eq player_1.current_position
                         expect(player_1.health).to be < 100
                         expect(subject.current_screen).to eq :turn
-                        expect(subject.turns_left).to eq 1
+                        expect(subject.current_player.turns_left).to eq 1
                       end
 
                       it "misses Player 1" do
@@ -257,7 +257,7 @@ module Xcommy
                           .to eq player_1.current_position
                         expect(player_1.health).to eq 100
                         expect(subject.current_screen).to eq :turn
-                        expect(subject.turns_left).to eq 1
+                        expect(subject.current_player.turns_left).to eq 1
                       end
                     end
                   end
@@ -286,7 +286,7 @@ module Xcommy
             end
 
             it "maintains turns left" do
-              expect(subject.turns_left).to eq 2
+              expect(subject.current_player.turns_left).to eq 2
             end
           end
 
@@ -339,7 +339,7 @@ module Xcommy
                     .to eq player_2.current_position
                   expect(player_2.health).to be < 100
                   expect(subject.current_screen).to eq :turn
-                  expect(subject.turns_left).to eq 1
+                  expect(subject.current_player.turns_left).to eq 1
                 end
               end
             end
@@ -351,7 +351,7 @@ module Xcommy
                 .to eq player_2.current_position
               expect(player_2.health).to eq 100
               expect(subject.current_screen).to eq :turn
-              expect(subject.turns_left).to eq 1
+              expect(subject.current_player.turns_left).to eq 1
             end
           end
         end
