@@ -37,7 +37,7 @@ module Xcommy
             end
 
             it "alerts to the spot not being available" do
-              expect(subject.display.user_interface.alert_message)
+              expect(subject.user_interface.alert_message)
                 .to eq "Spot not available"
             end
 
@@ -62,7 +62,7 @@ module Xcommy
             end
 
             it "alerts to the spot not being available" do
-              expect(subject.display.user_interface.alert_message)
+              expect(subject.user_interface.alert_message)
                 .to eq "Spot not available"
             end
 
@@ -120,7 +120,7 @@ module Xcommy
 
             context "second turn" do
               before do
-                subject.current_turns = [:move]
+                subject.current_player.current_turns << :move
                 subject.mock_input(enter)
               end
 
@@ -137,7 +137,7 @@ module Xcommy
               end
 
               it "empties the turns" do
-                expect(subject.current_turns).to be_empty
+                expect(subject.current_player.current_turns).to be_empty
               end
 
               describe "player 2's turn" do
@@ -188,7 +188,7 @@ module Xcommy
 
                       context "second turn" do
                         before do
-                          subject.current_turns = [:move]
+                          subject.current_player.current_turns << :move
                           subject.mock_input(enter)
                         end
 
@@ -205,7 +205,7 @@ module Xcommy
                         end
 
                         it "empties the turns" do
-                          expect(subject.current_turns).to be_empty
+                          expect(subject.current_player.current_turns).to be_empty
                         end
                       end
                     end

@@ -9,7 +9,7 @@ module Xcommy
     end
 
     def visible?
-      [:move, :spot, :fire].include? @game.display.current_screen
+      [:move, :spot, :fire].include? @game.current_screen
     end
 
     def set_on_center_spot

@@ -2,9 +2,8 @@ module Xcommy
   class Menu
     attr_reader :cursor, :game, :current_selection
 
-    def initialize(user_interface)
-      @user_interface = user_interface
-      @game = user_interface.game
+    def initialize(game)
+      @game = game
       @cursor = MenuCursor.new(self)
     end
 
@@ -29,7 +28,7 @@ module Xcommy
     end
 
     def items
-      case @user_interface.current_screen
+      case @game.current_screen
       when :spot
         ["Move To", "Cancel"]
       when :move_to

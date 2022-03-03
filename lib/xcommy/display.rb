@@ -1,45 +1,33 @@
 module Xcommy
   class Display
-    attr_accessor :user_interface
     attr_reader :game
 
     # What is this class really responsible for?
     def initialize(game)
       @game = game
-      @user_interface = UserInterface.new(@game)
-      @screen = Screen.new(@game.board, @user_interface)
-      @cinematic_scene = CinematicScene.new(@game, @screen)
     end
 
     def render(turn_option)
       if CinematicScene.types.include?(turn_option.to_sym)
-        @cinematic_scene.render(turn_option)
-
+        CinematicScene.new(@game).render(turn_option)
         @game.take_turn!(turn_option)
 
-        if @game.over?
-          @screen.render(:game_over)
-        else
-          @screen.render(:turn)
-        end
+        screen_type = @game.over? ? :game_over : :turn
+        Screen.new(@game).render(screen_type)
       else
-        @screen.render(turn_option)
+        Screen.new(@game).render(turn_option)
       end
     end
 
-    def current_screen
-      @screen.current
-    end
-
     def current_selection
-      if current_screen == :move
+      if @game.current_screen == :move
         spot_screen
       else
-        option = @user_interface.menu.current_selection
+        option = @game.user_interface.menu.current_selection
 
         unless CinematicScene.types.include?(option)
           @game.board.show_cursor!
-          @user_interface.menu.cursor.move_to_top!
+          @game.user_interface.menu.cursor.move_to_top!
         end
 
         option
@@ -47,13 +35,13 @@ module Xcommy
     end
 
     def change_cursor_position(direction)
-      if current_screen == :move
+      if @game.current_screen == :move
         @game.board.cursor.move_in direction
       else
-        @user_interface.menu.cursor.move_in direction
+        @game.user_interface.menu.cursor.move_in direction
       end
 
-      if current_screen == :fire
+      if @game.current_screen == :fire
         @game.board.toggle_static_cursor
       end
     end
@@ -61,12 +49,12 @@ module Xcommy
     private
 
     def spot_screen
-      @user_interface.refresh_alert_message!
+      @game.user_interface.refresh_alert_message!
 
       if @game.board.cursor_spot.nil?
         :spot
       else
-        @user_interface.alert_message = "Spot not available"
+        @game.user_interface.alert_message = "Spot not available"
         :move
       end
     end

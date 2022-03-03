@@ -1,15 +1,18 @@
 module Xcommy
   class UserInterface
-    attr_accessor :alert_message, :current_screen, :game, :menu
+    attr_accessor :alert_message, :game, :menu
 
     def initialize(game)
       @game = game
-      @menu = Menu.new(self)
+      @menu = Menu.new(@game)
       refresh_alert_message!
     end
 
-    def for_screen_type(current_screen_type)
-      @current_screen = current_screen_type
+    def current_player
+      @game.current_player
+    end
+
+    def content_rows
       build!
     end
 
@@ -24,9 +27,9 @@ module Xcommy
       content << interface_top_border
 
       content << interface_line
-      content << interface_text_line(@game.current_player.label)
+      content << interface_text_line(current_player.label)
 
-      if @current_screen == :game_over
+      if @game.current_screen == :game_over
         content << interface_text_line("WINS!!!")
       else
         content << interface_line
@@ -35,12 +38,12 @@ module Xcommy
       content << interface_divider
 
       content << interface_text_line("Health")
-      content << interface_text_line(@game.current_player.health.to_s)
+      content << interface_text_line(current_player.health.to_s)
       content << interface_divider
 
       content << interface_text_line(screen_title)
 
-      if @current_screen == :game_over
+      if @game.current_screen == :game_over
         content << interface_line
         content << interface_line
       else
@@ -70,7 +73,7 @@ module Xcommy
     end
 
     def screen_title
-      case @current_screen
+      case @game.current_screen
       when :turn
         "Choose Action"
       when :game_over
@@ -102,9 +105,9 @@ module Xcommy
 
     def turn_display
       prefix =
-        if @game.turns_left == 2
+        if current_player.turns_left == 2
           1
-        elsif @game.turns_left == 1
+        elsif current_player.turns_left == 1
           2
         else
           0

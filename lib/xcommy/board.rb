@@ -22,7 +22,7 @@ module Xcommy
     end
 
     def show_cursor!
-      if @game.display.user_interface.menu.fire_currently_selected?
+      if @game.user_interface.menu.fire_currently_selected?
         @cursor.set_on @game.other_players.first.current_position
       else
         @cursor.set_on_center_spot
@@ -40,12 +40,11 @@ module Xcommy
     end
 
     def toggle_static_cursor
-      if @game.display.user_interface.menu.cancel_item_highlighted?
+      if @game.user_interface.menu.cancel_item_highlighted?
         @game.board.cursor.hide!
       else
         @game.board.cursor.set_on(
           @game
-            .display
             .user_interface
             .menu.highlighted_player_object
             .current_position,

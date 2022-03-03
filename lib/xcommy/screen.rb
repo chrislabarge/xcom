@@ -1,10 +1,9 @@
 module Xcommy
   class Screen
-    attr_accessor :current
 
-    def initialize(board, user_interface)
-      @board = board
-      @user_interface = user_interface
+    def initialize(game)
+      @game = game
+      @board = @game.board
     end
 
     def render(screen_type)
@@ -32,7 +31,7 @@ module Xcommy
     def set_current_screen_type(screen_type)
       type = screen_type.to_sym
       type = :turn if type == :cancel
-      @current = type
+      @game.current_screen = type
     end
 
     def boarder_horizontal
@@ -45,7 +44,7 @@ module Xcommy
 
     def merge_components
       board_rows = @board.render
-      user_interface_rows = @user_interface.for_screen_type(@current)
+      user_interface_rows = @game.user_interface.content_rows
       merger = []
 
       board_rows.each_with_index do |board_display_line, index|

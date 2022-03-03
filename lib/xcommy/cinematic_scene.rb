@@ -8,13 +8,12 @@ module Xcommy
       [:move_to, :player_2, :player_1, :hit, :miss]
     end
 
-    def initialize(game, screen)
+    def initialize(game)
       @game = game
-      @screen = screen
     end
 
-    def render(screen_type)
-      send(screen_type)
+    def render(scene_type)
+      send(scene_type)
     end
 
     private
@@ -26,7 +25,7 @@ module Xcommy
         @game.current_player.move_to_next_position!
         @game.board.refresh!
 
-        @screen.render(:move_to)
+        Screen.new(@game).render(:move_to)
 
         long_sleep
       end
@@ -66,7 +65,7 @@ module Xcommy
       @game.fired_shot.hide!
       @game.board.refresh!
 
-      @screen.render(type)
+      Screen.new(@game).render(type)
 
       long_sleep
 
@@ -80,7 +79,7 @@ module Xcommy
       @game.fired_shot.move_to_next_position!
       @game.board.refresh!
 
-      @screen.render(type)
+      Screen.new(@game).render(type)
 
       long_sleep
     end
@@ -91,17 +90,17 @@ module Xcommy
       2.times do
         player.send("#{hit_or_miss}!")
         @game.board.refresh!
-        @screen.render(hit_or_miss)
+        Screen.new(@game).render(hit_or_miss)
         short_sleep
 
-        #Sending a "hit" to a entity sort of makes sense
+        # Sending a "hit" to a entity sort of makes sense
         # Sending a "miss" to a entity.. is kind of odd.
         # Why would the entity model need to keep track of a miss
         player.send("reset_#{hit_or_miss}!")
 
         player.show!
         @game.board.refresh!
-        @screen.render(hit_or_miss)
+        Screen.new(@game).render(hit_or_miss)
         short_sleep
       end
 
@@ -111,12 +110,12 @@ module Xcommy
     def render_blinking_player(player, screen_type)
       player.hide!
       @game.board.refresh!
-      @screen.render(screen_type)
+      Screen.new(@game).render(screen_type)
       short_sleep
 
       player.show!
       @game.board.refresh!
-      @screen.render(screen_type)
+      Screen.new(@game).render(screen_type)
       short_sleep
     end
   end

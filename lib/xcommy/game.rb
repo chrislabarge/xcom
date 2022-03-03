@@ -6,10 +6,11 @@ module Xcommy
                   :npcs,
                   :players,
                   :current_player,
+                  :current_screen,
                   :fired_shot,
                   :hit_damage,
-                  :current_turns,
                   :board,
+                  :user_interface
                   :display
 
     def initialize
@@ -17,8 +18,8 @@ module Xcommy
       @npcs = []
       @players = []
       @board = Board.new self
+      @user_interface = UserInterface.new self
       @display = Display.new self
-      @current_turns = []
       @fired_shot = nil
       @hit_damage = 10
     end
@@ -27,8 +28,9 @@ module Xcommy
       players - [current_player]
     end
 
+    # See if makes sense to remove this
     def turns_left
-      2 - @current_turns.count
+      @current_player.turns_left
     end
 
     def render(screen)
@@ -39,13 +41,8 @@ module Xcommy
       !players.all?(&:alive?)
     end
 
-    def current_screen
-      @display.current_screen
-    end
-
     def restart!
       @npcs = []
-      @current_turns = []
       @cover = Setup.generate_cover(self)
       @players[0].respawn!([9, 0])
       @players[1].respawn!([0, 0])
@@ -66,11 +63,11 @@ module Xcommy
     end
 
     def take_turn!(turn)
-      @current_turns << turn
+      @current_player.current_turns << turn
 
       if turns_left == 0
         @current_player = next_player
-        @current_turns = []
+        @current_player.reset_current_turns!
       end
     end
 
@@ -89,8 +86,8 @@ module Xcommy
       when "l"
         @display.change_cursor_position(:right)
       when "\r"
-        @display.user_interface.menu.select_highlighted_item!
-        if @display.user_interface.menu.exit_currently_selected?
+        @user_interface.menu.select_highlighted_item!
+        if @user_interface.menu.exit_currently_selected?
           exit
         else
           next_screen = @display.current_selection.downcase.to_sym
@@ -98,7 +95,7 @@ module Xcommy
       when "c"
         exit
       end
-      next_screen || @display.current_screen
+      next_screen || @current_screen
     end
 
     def mock_input(input)
