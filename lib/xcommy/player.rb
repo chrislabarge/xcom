@@ -1,16 +1,14 @@
 module Xcommy
   class Player < Entity
-    def turns_left
-      2 - @current_turns.count
-    end
+    attr_writer :turns_left
 
-    def current_turns
-      @current_turns ||= []
+    def turns_left
+      @turns_left ||= 2
     end
 
     def respawn!(starting_position)
       super(starting_position)
-      reset_current_turns!
+      reset_turns_left!
     end
 
     def fire_shot(at:)
@@ -21,8 +19,8 @@ module Xcommy
       )
     end
 
-    def reset_current_turns!
-      @current_turns = []
+    def reset_turns_left!
+      @turns_left = nil
     end
   end
 end

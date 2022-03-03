@@ -1,6 +1,5 @@
 module Xcommy
   class Screen
-
     def initialize(game)
       @game = game
       @board = @game.board

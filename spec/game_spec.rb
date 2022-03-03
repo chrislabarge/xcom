@@ -120,7 +120,7 @@ module Xcommy
 
             context "second turn" do
               before do
-                subject.current_player.current_turns << :move
+                subject.current_player.turns_left -= 1
                 subject.mock_input(enter)
               end
 
@@ -136,8 +136,8 @@ module Xcommy
                 expect(subject.current_screen).to eq :turn
               end
 
-              it "empties the turns" do
-                expect(subject.current_player.current_turns).to be_empty
+              it "resets turns" do
+                expect(subject.current_player.turns_left).to eq 2
               end
 
               describe "player 2's turn" do
@@ -188,7 +188,7 @@ module Xcommy
 
                       context "second turn" do
                         before do
-                          subject.current_player.current_turns << :move
+                          subject.current_player.turns_left -= 1
                           subject.mock_input(enter)
                         end
 
@@ -205,7 +205,7 @@ module Xcommy
                         end
 
                         it "empties the turns" do
-                          expect(subject.current_player.current_turns).to be_empty
+                          expect(subject.current_player.turns_left).to eq 2
                         end
                       end
                     end

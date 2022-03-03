@@ -11,7 +11,6 @@ module Xcommy
                   :hit_damage,
                   :board,
                   :user_interface
-                  :display
 
     def initialize
       @cover = []
@@ -19,7 +18,6 @@ module Xcommy
       @players = []
       @board = Board.new self
       @user_interface = UserInterface.new self
-      @display = Display.new self
       @fired_shot = nil
       @hit_damage = 10
     end
@@ -33,8 +31,15 @@ module Xcommy
       @current_player.turns_left
     end
 
-    def render(screen)
-      @display.render(screen)
+    def render(screen_type)
+      if CinematicScene.types.include?(screen_type.to_sym)
+        CinematicScene.new(self).render(screen_type)
+        take_turn!
+
+        screen_type = over? ? :game_over : :turn
+      end
+
+      Screen.new(self).render(screen_type)
     end
 
     def over?
@@ -62,12 +67,12 @@ module Xcommy
       end
     end
 
-    def take_turn!(turn)
-      @current_player.current_turns << turn
+    def take_turn!
+      @current_player.turns_left -= 1
 
-      if turns_left == 0
+      if @current_player.turns_left.zero?
         @current_player = next_player
-        @current_player.reset_current_turns!
+        @current_player.reset_turns_left!
       end
     end
 
@@ -78,19 +83,19 @@ module Xcommy
       next_screen = nil
       case input
       when "j"
-        @display.change_cursor_position(:down)
+        change_cursor_position(:down)
       when "k"
-        @display.change_cursor_position(:up)
+        change_cursor_position(:up)
       when "h"
-        @display.change_cursor_position(:left)
+        change_cursor_position(:left)
       when "l"
-        @display.change_cursor_position(:right)
+        change_cursor_position(:right)
       when "\r"
         @user_interface.menu.select_highlighted_item!
         if @user_interface.menu.exit_currently_selected?
           exit
         else
-          next_screen = @display.current_selection.downcase.to_sym
+          next_screen = current_selection.downcase.to_sym
         end
       when "c"
         exit
@@ -103,6 +108,44 @@ module Xcommy
     end
 
     private
+
+    def change_cursor_position(direction)
+      if @current_screen == :move
+        @board.cursor.move_in direction
+      else
+        @user_interface.menu.cursor.move_in direction
+      end
+
+      if @current_screen == :fire
+        @board.toggle_static_cursor
+      end
+    end
+
+    def current_selection
+      if @current_screen == :move
+        spot_screen
+      else
+        option = @user_interface.menu.current_selection
+
+        unless CinematicScene.types.include?(option)
+          @board.show_cursor!
+          @user_interface.menu.cursor.move_to_top!
+        end
+
+        option
+      end
+    end
+
+    def spot_screen
+      @user_interface.refresh_alert_message!
+
+      if @board.cursor_spot.nil?
+        :spot
+      else
+        @user_interface.alert_message = "Spot not available"
+        :move
+      end
+    end
 
     def next_player
       players[-(players.index(@current_player) + 1)]
