@@ -30,9 +30,7 @@ module Xcommy
               subject.other_players.first.current_position = [8, 0]
               subject.board.refresh!
 
-              4.times { subject.mock_input(down) }
-              5.times { subject.mock_input(left) }
-
+              2.times { subject.mock_input(left) }
               subject.mock_input(enter)
             end
 
@@ -55,9 +53,7 @@ module Xcommy
               subject.cover.first.position = [8, 0]
               subject.board.refresh!
 
-              4.times { subject.mock_input(down) }
-              5.times { subject.mock_input(left) }
-
+              2.times { subject.mock_input(left) }
               subject.mock_input(enter)
             end
 
@@ -78,8 +74,7 @@ module Xcommy
 
         describe "choosing spot above current position" do
           before do
-            3.times { subject.mock_input(down) }
-            5.times { subject.mock_input(left) }
+            2.times { subject.mock_input(left) }
             subject.mock_input(enter)
           end
 
@@ -105,7 +100,7 @@ module Xcommy
               end
 
               it "moves the player" do
-                expect(subject.current_player.current_position).to eq [7, 0]
+                expect(subject.current_player.current_position).to eq [8, 0]
               end
 
               it "renders the turn screen" do
@@ -125,7 +120,7 @@ module Xcommy
               end
 
               it "moves the player" do
-                expect(subject.players[0].current_position).to eq [7, 0]
+                expect(subject.players[0].current_position).to eq [8, 0]
               end
 
               it "switches to Player 2's turn" do
@@ -146,8 +141,7 @@ module Xcommy
                     before do
                       subject.mock_input(enter)
 
-                      2.times { subject.mock_input(up) }
-                      5.times { subject.mock_input(left) }
+                      2.times { subject.mock_input(left) }
 
                       subject.mock_input(enter)
                     end
@@ -174,7 +168,7 @@ module Xcommy
                         end
 
                         it "moves the player" do
-                          expect(subject.players[1].current_position).to eq [2, 0]
+                          expect(subject.players[1].current_position).to eq [1, 0]
                         end
 
                         it "renders the turn screen" do
@@ -193,7 +187,7 @@ module Xcommy
                         end
 
                         it "moves the player" do
-                          expect(subject.players[1].current_position).to eq [2, 0]
+                          expect(subject.players[1].current_position).to eq [1, 0]
                         end
 
                         it "switches to Player 1's turn" do

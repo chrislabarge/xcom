@@ -68,18 +68,6 @@ module Xcommy
       !players.all?(&:alive?)
     end
 
-    def change_cursor_position(direction)
-      if @current_screen == :move
-        @board.cursor.move_in direction
-      else
-        @user_interface.menu.cursor.move_in direction
-      end
-
-      if @current_screen == :fire
-        @board.toggle_static_cursor
-      end
-    end
-
     def current_selection
       if @current_screen == :move
         spot_screen
@@ -144,6 +132,18 @@ module Xcommy
         exit
       end
       next_screen || @current_screen
+    end
+
+    def change_cursor_position(direction)
+      if @current_screen == :move
+        @board.cursor.move_in direction
+      else
+        @user_interface.menu.cursor.move_in direction
+      end
+
+      if @current_screen == :fire
+        @board.toggle_static_cursor
+      end
     end
   end
 end

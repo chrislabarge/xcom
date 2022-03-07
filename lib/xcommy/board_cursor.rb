@@ -6,14 +6,15 @@ module Xcommy
       @board = board
       @game = @board.game
       @coords = []
+      @anchor = nil
     end
 
     def visible?
       [:move, :spot, :fire].include? @game.current_screen
     end
 
-    def set_on_center_spot
-      @coords = [4, 5]
+    def set_on_current_player_perimeter
+      @coords = @game.board.positions_within_player_perimeter.last
     end
 
     def hide!
@@ -28,13 +29,17 @@ module Xcommy
     def move_in(direction)
       case direction
       when :up
-        @coords[0] -= 1 unless @coords[0] == 0
+        new_position = [@coords[0] - 1, @coords[1]]
       when :down
-        @coords[0] += 1 unless @coords[0] == (Board.spot_length - 1)
+        new_position = [@coords[0] + 1, @coords[1]]
       when :left
-        @coords[1] -= 1 unless @coords[1] == 0
+        new_position = [@coords[0], @coords[1] - 1]
       when :right
-        @coords[1] += 1 unless @coords[1] == (Board.spot_length - 1)
+        new_position = [@coords[0], @coords[1] + 1]
+      end
+
+      if @board.position_within_player_perimeter?(new_position)
+        @coords = new_position
       end
     end
 

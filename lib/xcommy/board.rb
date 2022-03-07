@@ -10,6 +10,13 @@ module Xcommy
       @cursor = BoardCursor.new(self)
     end
 
+    def position_within_board?(position)
+      max_spot_limit = self.class.spot_length - 1
+
+      position[0].between?(0, max_spot_limit) &&
+        position[1].between?(0, max_spot_limit)
+    end
+
     def self.distance_between(spot1, spot2)
       y = spot1[0] - spot2[0]
       x = spot1[1] - spot2[1]
@@ -25,10 +32,62 @@ module Xcommy
       if @game.user_interface.menu.fire_currently_selected?
         @cursor.set_on @game.other_players.first.current_position
       else
-        @cursor.set_on_center_spot
+        @cursor.set_on_current_player_perimeter
       end
 
       refresh!
+    end
+
+    def positions_within_player_perimeter
+      anchor = @game.current_player.current_position
+      positions = [anchor]
+
+      player_perimeter_coords.each do |coord|
+        available_position = [anchor[0] + coord[0], anchor[1] + coord[1]]
+
+        if position_within_board?(available_position)
+          positions << available_position
+        end
+      end
+
+      positions
+    end
+
+    def position_within_player_perimeter?(position)
+      positions_within_player_perimeter.include? position
+    end
+
+    def player_perimeter_coords
+      [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [1, 0],
+        [1, -1],
+        [1, 1],
+
+        [-2, 0],
+        [-2, 1],
+        [-2, -1],
+        [-2, -2],
+        [-2, 2],
+
+        [2, 0],
+        [2, 1],
+        [2, -1],
+        [2, -2],
+        [2, 2],
+
+        [0, -1],
+        [0, 1],
+        [0, -2],
+        [0, 2],
+
+        [-1, -2],
+        [1, 2],
+        [1, -2],
+        [-1, 2],
+      ]
     end
 
     def cursor_spot
