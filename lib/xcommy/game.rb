@@ -22,6 +22,10 @@ module Xcommy
       @hit_damage = 10
     end
 
+    def networking?
+      @network != nil
+    end
+
     def other_players
       players - [current_player]
     end
