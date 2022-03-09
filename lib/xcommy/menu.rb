@@ -37,9 +37,7 @@ module Xcommy
         ["Select Spot"]
       when :fire
         fire_items
-      when :player_2
-        [fire_at_player_text(currently_selected_player_object)]
-      when :player_1
+      when :firing
         [fire_at_player_text(currently_selected_player_object)]
       when :hit
         [fire_at_player_text(currently_selected_player_object)]

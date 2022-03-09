@@ -4,6 +4,7 @@ module Xcommy
     SHORT_SLEEP = 0.25
     TESTING_SLEEP = 0
 
+    # Can I change this?
     def self.types
       [:move_to, :player_2, :player_1, :hit, :miss]
     end
@@ -12,22 +13,20 @@ module Xcommy
       @game = game
     end
 
-    # I could potentially use the Turn#type to capture, hit, or miss,
-    # and then the "firing" would be implied.
-
     def self.render(turn)
+      instance = new(turn.game)
       case turn.type
       when :move
-        new(turn.game).move_to(turn.position)
+        instance.move_to(turn.position)
+      when :hit
+        instance.fired_shot(turn.at_player, :hit)
+      when :miss
+        instance.fired_shot(turn.at_player, :miss)
       end
     end
 
-    def render(scene_type)
-      send(scene_type)
-    end
-
-    def move_to(position = nil)
-      @game.current_player.current_destination = position || @game.board.cursor.coords
+    def move_to(position)
+      @game.current_player.current_destination = position
 
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
@@ -39,27 +38,25 @@ module Xcommy
       end
     end
 
-    def fired_shot(receiving_entity, type, result=nil)
-      @game.fired_shot = @game.current_player.fire_shot(at: receiving_entity)
+    def fired_shot(receiving_entity, result)
+      # this seems sloppy to have here
+      @game.fired_shot ||= FiredShot.new(
+        @game,
+        @game.current_player.current_position,
+        receiving_entity,
+        result,
+      )
 
       while !@game.fired_shot.reached_destination?
-        advance_and_render_fired_shot(type)
+        advance_and_render_fired_shot
       end
 
-      render_fired_shot_outcome(type)
+      render_fired_shot_outcome(receiving_entity, result)
 
       @game.fired_shot = nil
     end
 
     private
-
-    def player_2
-      fired_shot(@game.other_players[0], :player_2)
-    end
-
-    def player_1
-      fired_shot(@game.other_players[0], :player_1)
-    end
 
     def short_sleep
       length = Setup.testing? ? TESTING_SLEEP : SHORT_SLEEP
@@ -71,25 +68,25 @@ module Xcommy
       sleep length
     end
 
-    def render_fired_shot_outcome(type)
+    def render_fired_shot_outcome(at_player, result)
       @game.fired_shot.hide!
       @game.board.refresh!
 
-      Screen.new(@game).render(type)
+      Screen.new(@game).render(:firing)
 
       long_sleep
 
       render_player_spot_message(
-        @game.fired_shot.at_player,
-        @game.fired_shot.result,
+        at_player,
+        result,
       )
     end
 
-    def advance_and_render_fired_shot(type)
+    def advance_and_render_fired_shot
       @game.fired_shot.move_to_next_position!
       @game.board.refresh!
 
-      Screen.new(@game).render(type)
+      Screen.new(@game).render(:firing)
 
       long_sleep
     end

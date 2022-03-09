@@ -2,16 +2,17 @@ module Xcommy
   class FiredShot < Entity
     attr_accessor :at_player
 
-    def initialize(game, starting_position, player_fired_at)
+    def initialize(game, starting_position, player_fired_at, result = nil)
       @game = game
       @current_position = duplicate_coords starting_position
       @at_player = player_fired_at
       @current_destination = duplicate_coords at_player.current_position
+      @result = result
       show!
     end
 
     def result
-      if successfully_hit?
+      @result ||= if successfully_hit?
         @at_player.health -= @game.hit_damage
         :hit
       else

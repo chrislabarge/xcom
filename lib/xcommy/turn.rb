@@ -12,6 +12,10 @@ module Xcommy
       @game = game
     end
 
+    def at_player
+      @game.players[player_index]
+    end
+
     def successful?
       @id = new_id
       @position = find_position

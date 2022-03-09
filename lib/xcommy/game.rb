@@ -62,6 +62,12 @@ module Xcommy
     # So the player firing at another player, plus that outcome of
     # that firing, either a hit or a miss.
     # Right now they are separated out I think.
+
+    #this is just for stubbing purposes
+    def new_fired_shot
+      @current_player.fire_shot(at: other_players.last)
+    end
+
     def render(screen_type)
       if CinematicScene.types.include?(screen_type.to_sym)
 
@@ -69,18 +75,15 @@ module Xcommy
         when :move_to
           turn = Turn.new(type: :move, game: self)
         else
-          turn = Turn.new(type: :fire, game: self, player_index: other_players.last.index)
+          # THis is where I need to extract the fired show out of
+          @fired_shot = new_fired_shot
+          turn = Turn.new(type: @fired_shot.result, game: self, player_index: other_players.last.index)
         end
 
         if turn.successful?
           # The goal is to have this be
           # CinematicScene.for(turn)
-          if turn.type == :move
-            CinematicScene.render(turn)
-          else
-            CinematicScene.new(self).render(screen_type)
-          end
-
+          CinematicScene.render(turn)
           take_turn!
           @last_turn = turn
           screen_type = over? ? :game_over : :turn

@@ -232,7 +232,7 @@ module Xcommy
                       let!(:fired_shot) { player_2.fire_shot(at: player_1) }
 
                       before do
-                        allow(subject).to receive(:fired_shot) { fired_shot }
+                        allow(subject).to receive(:new_fired_shot) { fired_shot }
                       end
 
                       it "hits Player 1" do
@@ -289,7 +289,7 @@ module Xcommy
             let!(:fired_shot) { player_1.fire_shot(at: player_2) }
 
             before do
-              allow(subject).to receive(:fired_shot) { fired_shot }
+              allow(subject).to receive(:new_fired_shot) { fired_shot }
             end
 
             describe "hits player 2" do
