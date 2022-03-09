@@ -7,6 +7,7 @@ module Xcommy
                   :players,
                   :current_player,
                   :current_screen,
+                  :last_turn,
                   :fired_shot,
                   :hit_damage,
                   :board,
@@ -57,12 +58,35 @@ module Xcommy
 
     private
 
+    # I need to some how get 1 cinematic scene out of a Fire turn,
+    # So the player firing at another player, plus that outcome of
+    # that firing, either a hit or a miss.
+    # Right now they are separated out I think.
     def render(screen_type)
       if CinematicScene.types.include?(screen_type.to_sym)
-        CinematicScene.new(self).render(screen_type)
-        take_turn!
 
-        screen_type = over? ? :game_over : :turn
+        case screen_type.to_sym
+        when :move_to
+          turn = Turn.new(type: :move, game: self)
+        else
+          turn = Turn.new(type: :fire, game: self, player_index: other_players.last.index)
+        end
+
+        if turn.successful?
+          # The goal is to have this be
+          # CinematicScene.for(turn)
+          if turn.type == :move
+            CinematicScene.render(turn)
+          else
+            CinematicScene.new(self).render(screen_type)
+          end
+
+          take_turn!
+          @last_turn = turn
+          screen_type = over? ? :game_over : :turn
+        else
+          screen_type = :turn
+        end
       end
 
       Screen.new(self).render(screen_type)

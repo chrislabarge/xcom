@@ -6,6 +6,10 @@ module Xcommy
       @turns_left ||= 2
     end
 
+    def index
+      @game.players.index(self)
+    end
+
     def respawn!(starting_position)
       super(starting_position)
       reset_turns_left!

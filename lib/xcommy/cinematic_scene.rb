@@ -12,14 +12,22 @@ module Xcommy
       @game = game
     end
 
+    # I could potentially use the Turn#type to capture, hit, or miss,
+    # and then the "firing" would be implied.
+
+    def self.render(turn)
+      case turn.type
+      when :move
+        new(turn.game).move_to(turn.position)
+      end
+    end
+
     def render(scene_type)
       send(scene_type)
     end
 
-    private
-
-    def move_to
-      @game.current_player.current_destination = @game.board.cursor.coords
+    def move_to(position = nil)
+      @game.current_player.current_destination = position || @game.board.cursor.coords
 
       while !@game.current_player.reached_destination?
         @game.current_player.move_to_next_position!
@@ -30,6 +38,20 @@ module Xcommy
         long_sleep
       end
     end
+
+    def fired_shot(receiving_entity, type, result=nil)
+      @game.fired_shot = @game.current_player.fire_shot(at: receiving_entity)
+
+      while !@game.fired_shot.reached_destination?
+        advance_and_render_fired_shot(type)
+      end
+
+      render_fired_shot_outcome(type)
+
+      @game.fired_shot = nil
+    end
+
+    private
 
     def player_2
       fired_shot(@game.other_players[0], :player_2)
@@ -47,18 +69,6 @@ module Xcommy
     def long_sleep
       length = Setup.testing? ? TESTING_SLEEP : LONG_SLEEP
       sleep length
-    end
-
-    def fired_shot(receiving_entity, type)
-      @game.fired_shot = @game.current_player.fire_shot(at: receiving_entity)
-
-      while !@game.fired_shot.reached_destination?
-        advance_and_render_fired_shot(type)
-      end
-
-      render_fired_shot_outcome(type)
-
-      @game.fired_shot = nil
     end
 
     def render_fired_shot_outcome(type)

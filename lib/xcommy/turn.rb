@@ -2,10 +2,9 @@ require "json"
 
 module Xcommy
   class Turn
-    attr_writer :player_index, :type, :position
-    attr_accessor :id
+    attr_accessor :player_index, :type, :position, :id, :game
 
-    def initialize(id:, type:, player_index:, position: nil, game: nil)
+    def initialize(type:, player_index: nil, id: nil, position: nil, game: nil)
       @id = id
       @type = type
       @player_index = player_index
@@ -14,6 +13,11 @@ module Xcommy
     end
 
     def successful?
+      @id = new_id
+      @position = find_position
+
+      # I think this networking conditional will have to get moved
+      # to the game class... As I will need to know when to render a "Waiting" screen.
       if @game.networking?
         generate_on_server!
       else
@@ -26,6 +30,14 @@ module Xcommy
     end
 
     private
+
+    def new_id
+      (@game.last_turn&.id || 0) + 1
+    end
+
+    def find_position
+      @game.board.cursor.coords
+    end
 
     def generate_on_server!
       #some post request to the server URL.
