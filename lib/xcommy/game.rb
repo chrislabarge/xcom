@@ -58,38 +58,12 @@ module Xcommy
 
     private
 
-    # I need to some how get 1 cinematic scene out of a Fire turn,
-    # So the player firing at another player, plus that outcome of
-    # that firing, either a hit or a miss.
-    # Right now they are separated out I think.
-
-    #this is just for stubbing purposes
-    def new_fired_shot
-      @current_player.fire_shot(at: other_players.last)
-    end
-
     def render(screen_type)
-      if CinematicScene.types.include?(screen_type.to_sym)
-
-        case screen_type.to_sym
-        when :move_to
-          turn = Turn.new(type: :move, game: self)
-        else
-          # THis is where I need to extract the fired show out of
-          @fired_shot = new_fired_shot
-          turn = Turn.new(type: @fired_shot.result, game: self, player_index: other_players.last.index)
-        end
-
-        if turn.successful?
-          # The goal is to have this be
-          # CinematicScene.for(turn)
-          CinematicScene.render(turn)
-          take_turn!
-          @last_turn = turn
-          screen_type = over? ? :game_over : :turn
-        else
-          screen_type = :turn
-        end
+      if Turn.types.include?(screen_type.to_sym)
+        generate_turn!(screen_type)
+        # change this screen_type to be `new_turn`. Or `select_turn`.  It
+        # is confusing with the Turn model now.
+        screen_type = over? ? :game_over : :turn
       end
 
       Screen.new(self).render(screen_type)
@@ -105,7 +79,7 @@ module Xcommy
       else
         option = @user_interface.menu.current_selection
 
-        unless CinematicScene.types.include?(option)
+        unless Turn.types.include?(option)
           @board.show_cursor!
           @user_interface.menu.cursor.move_to_top!
         end
@@ -123,6 +97,29 @@ module Xcommy
         @user_interface.alert_message = "Spot not available"
         :move
       end
+    end
+
+    def generate_turn!(screen_type)
+      turn = Turn.new(game: self)
+
+      case screen_type.to_sym
+      when :move_to
+        turn.type = :move_to
+      else
+        @fired_shot = new_fired_shot
+        turn.type = @fired_shot.result
+        turn.player_index = other_players.last.index
+      end
+
+      if turn.successful?
+        CinematicScene.render(turn)
+        take_turn!
+        @last_turn = turn
+      end
+    end
+
+    def new_fired_shot
+      @current_player.fire_shot(at: other_players.last)
     end
 
     def next_player

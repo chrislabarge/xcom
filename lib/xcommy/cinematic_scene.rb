@@ -4,11 +4,6 @@ module Xcommy
     SHORT_SLEEP = 0.25
     TESTING_SLEEP = 0
 
-    # Can I change this?
-    def self.types
-      [:move_to, :player_2, :player_1, :hit, :miss]
-    end
-
     def initialize(game)
       @game = game
     end
@@ -16,7 +11,7 @@ module Xcommy
     def self.render(turn)
       instance = new(turn.game)
       case turn.type
-      when :move
+      when :move_to
         instance.move_to(turn.position)
       when :hit
         instance.fired_shot(turn.at_player, :hit)

@@ -4,7 +4,11 @@ module Xcommy
   class Turn
     attr_accessor :player_index, :type, :position, :id, :game
 
-    def initialize(type:, player_index: nil, id: nil, position: nil, game: nil)
+    def self.types
+      [:move_to, :player_2, :player_1, :hit, :miss]
+    end
+
+    def initialize(type: nil, player_index: nil, id: nil, position: nil, game: nil)
       @id = id
       @type = type
       @player_index = player_index
