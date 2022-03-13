@@ -74,7 +74,7 @@ module Xcommy
 
     def screen_title
       case @game.current_screen
-      when :turn
+      when :new_turn
         "Choose Action"
       when :game_over
         "Choose To"

@@ -72,7 +72,7 @@ module Xcommy
         :player_2
       elsif str.include?("play_again")
         @game.restart!
-        :turn
+        :new_turn
       else
         str
       end

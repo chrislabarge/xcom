@@ -29,7 +29,7 @@ module Xcommy
 
     def set_current_screen_type(screen_type)
       type = screen_type.to_sym
-      type = :turn if type == :cancel
+      type = :new_turn if type == :cancel
       @game.current_screen = type
     end
 

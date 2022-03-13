@@ -43,7 +43,7 @@ module Xcommy
     def start
       @board.refresh!
       @current_player = @players.first
-      render(:turn)
+      render(:new_turn)
 
       unless Setup.testing?
         loop do
@@ -66,9 +66,7 @@ module Xcommy
       return :game_over if over?
 
       if local_players.include?(@current_player)
-        # change this screen_type to be `new_turn`. Or `select_turn`.  It
-        # is confusing with the Turn model now.
-        :turn
+        :new_turn
       else
         :waiting
       end

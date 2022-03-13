@@ -10,7 +10,7 @@ module Xcommy
 
     it "begins with player 1 taking a turn" do
       expect(subject.current_player).to eq subject.players.first
-      expect(subject.current_screen).to eq :turn
+      expect(subject.current_screen).to eq :new_turn
     end
 
     it "starts the players on opposing ends of the board" do
@@ -85,7 +85,7 @@ module Xcommy
             end
 
             it "reverts to original turn menu" do
-              expect(subject.current_screen).to eq :turn
+              expect(subject.current_screen).to eq :new_turn
             end
 
             it "maintains turns left" do
@@ -104,7 +104,7 @@ module Xcommy
               end
 
               it "renders the turn screen" do
-                expect(subject.current_screen).to eq :turn
+                expect(subject.current_screen).to eq :new_turn
               end
 
               it "subtracts a turn" do
@@ -156,7 +156,7 @@ module Xcommy
                 end
 
                 it "renders the turn screen for Player 2" do
-                  expect(subject.current_screen).to eq :turn
+                  expect(subject.current_screen).to eq :new_turn
                 end
 
                 it "resets turns" do
@@ -181,7 +181,7 @@ module Xcommy
                         end
 
                         it "reverts to original turn menu" do
-                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_screen).to eq :new_turn
                         end
 
                         it "maintains turns left" do
@@ -200,7 +200,7 @@ module Xcommy
                           end
 
                           it "renders the turn screen" do
-                            expect(subject.current_screen).to eq :turn
+                            expect(subject.current_screen).to eq :new_turn
                           end
 
                           it "subtracts a turn" do
@@ -223,7 +223,7 @@ module Xcommy
                           end
 
                           it "renders the turn screen for Player 1" do
-                            expect(subject.current_screen).to eq :turn
+                            expect(subject.current_screen).to eq :new_turn
                           end
 
                           it "empties the turns" do
@@ -248,7 +248,7 @@ module Xcommy
                         end
 
                         it "reverts to original turn menu" do
-                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_screen).to eq :new_turn
                         end
 
                         it "maintains turns left" do
@@ -268,7 +268,7 @@ module Xcommy
                           subject.mock_input(enter)
                           expect(fired_shot.current_position).to eq player_1.current_position
                           expect(player_1.health).to be < 100
-                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_screen).to eq :new_turn
                           expect(subject.current_player.turns_left).to eq 1
                         end
 
@@ -278,7 +278,7 @@ module Xcommy
                           expect(fired_shot.current_position)
                             .to eq player_1.current_position
                           expect(player_1.health).to eq 100
-                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_screen).to eq :new_turn
                           expect(subject.current_player.turns_left).to eq 1
                         end
                       end
@@ -305,7 +305,7 @@ module Xcommy
             end
 
             it "reverts to original turn menu" do
-              expect(subject.current_screen).to eq :turn
+              expect(subject.current_screen).to eq :new_turn
             end
 
             it "maintains turns left" do
@@ -342,7 +342,7 @@ module Xcommy
                   it "starts a new game" do
                     subject.mock_input(enter)
                     expect(player_2.health).to eq 100
-                    expect(subject.current_screen).to eq :turn
+                    expect(subject.current_screen).to eq :new_turn
                     expect(subject.current_player).to eq player_1
                   end
 
@@ -361,7 +361,7 @@ module Xcommy
                   expect(fired_shot.current_position)
                     .to eq player_2.current_position
                   expect(player_2.health).to be < 100
-                  expect(subject.current_screen).to eq :turn
+                  expect(subject.current_screen).to eq :new_turn
                   expect(subject.current_player.turns_left).to eq 1
                 end
               end
@@ -373,7 +373,7 @@ module Xcommy
               expect(fired_shot.current_position)
                 .to eq player_2.current_position
               expect(player_2.health).to eq 100
-              expect(subject.current_screen).to eq :turn
+              expect(subject.current_screen).to eq :new_turn
               expect(subject.current_player.turns_left).to eq 1
             end
           end
