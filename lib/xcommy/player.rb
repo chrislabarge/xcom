@@ -2,6 +2,19 @@ module Xcommy
   class Player < Entity
     attr_writer :turns_left
 
+    def initialize(game, starting_position, from_local_client: true)
+      super(game, starting_position)
+      @from_local_client = from_local_client
+    end
+
+    def from_network_client?
+      !@from_local_client
+    end
+
+    def from_local_client?
+      @from_local_client == true
+    end
+
     def turns_left
       @turns_left ||= 2
     end

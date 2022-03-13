@@ -82,6 +82,8 @@ module Xcommy
         "Moving..."
       when :move
         "Selecting..."
+      when :waiting
+        "Waiting..."
       when :spot
         "Spot Selected"
       when :fire

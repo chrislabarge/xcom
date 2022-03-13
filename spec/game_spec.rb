@@ -116,142 +116,171 @@ module Xcommy
             context "second turn" do
               before do
                 subject.current_player.turns_left -= 1
-                subject.mock_input(enter)
               end
 
-              it "moves the player" do
-                expect(subject.players[0].current_position).to eq [8, 0]
+              context "when player_2 is playing networked" do
+                before do
+                  allow(player_2).to receive(:from_local_client?) { false }
+                  subject.mock_input(enter)
+                end
+
+                it "moves the player" do
+                  expect(subject.players[0].current_position).to eq [8, 0]
+                end
+
+                it "switches to Player 2's turn" do
+                  expect(subject.current_player).to eq subject.players[1]
+                end
+
+                it "renders the waiting screen for local players" do
+                  expect(subject.current_screen).to eq :waiting
+                end
+
+                it "resets turns" do
+                  expect(subject.current_player.turns_left).to eq 2
+                end
               end
 
-              it "switches to Player 2's turn" do
-                expect(subject.current_player).to eq subject.players[1]
-              end
+              context "when player_2 is playing locally" do
+                before do
+                  allow(player_2).to receive(:from_local_client?) { true }
+                  subject.mock_input(enter)
+                end
 
-              it "renders the turn screen for Player 2" do
-                expect(subject.current_screen).to eq :turn
-              end
+                it "moves the player" do
+                  expect(subject.players[0].current_position).to eq [8, 0]
+                end
 
-              it "resets turns" do
-                expect(subject.current_player.turns_left).to eq 2
-              end
+                it "switches to Player 2's turn" do
+                  expect(subject.current_player).to eq subject.players[1]
+                end
 
-              describe "player 2's turn" do
-                context "moving" do
-                  describe "choosing spot below current position" do
-                    before do
-                      subject.mock_input(enter)
+                it "renders the turn screen for Player 2" do
+                  expect(subject.current_screen).to eq :turn
+                end
 
-                      2.times { subject.mock_input(left) }
+                it "resets turns" do
+                  expect(subject.current_player.turns_left).to eq 2
+                end
 
-                      subject.mock_input(enter)
-                    end
-
-                    describe "canceling chosen spot" do
+                describe "player 2's turn" do
+                  context "moving" do
+                    describe "choosing spot below current position" do
                       before do
-                        subject.mock_input(down)
+                        subject.mock_input(enter)
+
+                        2.times { subject.mock_input(left) }
+
                         subject.mock_input(enter)
                       end
 
-                      it "reverts to original turn menu" do
-                        expect(subject.current_screen).to eq :turn
-                      end
-
-                      it "maintains turns left" do
-                        expect(subject.current_player.turns_left).to eq 2
-                      end
-                    end
-
-                    describe "confirming chosen spot" do
-                      context "first turn" do
+                      describe "canceling chosen spot" do
                         before do
+                          subject.mock_input(down)
                           subject.mock_input(enter)
                         end
 
-                        it "moves the player" do
-                          expect(subject.players[1].current_position).to eq [1, 0]
-                        end
-
-                        it "renders the turn screen" do
+                        it "reverts to original turn menu" do
                           expect(subject.current_screen).to eq :turn
                         end
 
-                        it "subtracts a turn" do
-                          expect(subject.current_player.turns_left).to eq 1
-                        end
-                      end
-
-                      context "second turn" do
-                        before do
-                          subject.current_player.turns_left -= 1
-                          subject.mock_input(enter)
-                        end
-
-                        it "moves the player" do
-                          expect(subject.players[1].current_position).to eq [1, 0]
-                        end
-
-                        it "switches to Player 1's turn" do
-                          expect(subject.current_player).to eq player_1
-                        end
-
-                        it "renders the turn screen for Player 1" do
-                          expect(subject.current_screen).to eq :turn
-                        end
-
-                        it "empties the turns" do
+                        it "maintains turns left" do
                           expect(subject.current_player.turns_left).to eq 2
                         end
                       end
+
+                      describe "confirming chosen spot" do
+                        context "first turn" do
+                          before do
+                            subject.mock_input(enter)
+                          end
+
+                          it "moves the player" do
+                            expect(subject.players[1].current_position).to eq [1, 0]
+                          end
+
+                          it "renders the turn screen" do
+                            expect(subject.current_screen).to eq :turn
+                          end
+
+                          it "subtracts a turn" do
+                            expect(subject.current_player.turns_left).to eq 1
+                          end
+                        end
+
+                        context "second turn" do
+                          before do
+                            subject.current_player.turns_left -= 1
+                            subject.mock_input(enter)
+                          end
+
+                          it "moves the player" do
+                            expect(subject.players[1].current_position).to eq [1, 0]
+                          end
+
+                          it "switches to Player 1's turn" do
+                            expect(subject.current_player).to eq player_1
+                          end
+
+                          it "renders the turn screen for Player 1" do
+                            expect(subject.current_screen).to eq :turn
+                          end
+
+                          it "empties the turns" do
+                            expect(subject.current_player.turns_left).to eq 2
+                          end
+                        end
+                      end
                     end
                   end
-                end
 
-                context "firing" do
-                  before do
-                    subject.mock_input(down)
-                    subject.mock_input(enter)
-                  end
-
-                  describe "fire sub-menu" do
-                    describe "choosing Cancel" do
-                      before do
-                        subject.mock_input(down)
-                        subject.mock_input(enter)
-                      end
-
-                      it "reverts to original turn menu" do
-                        expect(subject.current_screen).to eq :turn
-                      end
-
-                      it "maintains turns left" do
-                        expect(subject.current_player.turns_left).to eq 2
-                      end
+                  context "firing" do
+                    before do
+                      subject.mock_input(down)
+                      subject.mock_input(enter)
                     end
 
-                    describe "choosing Player 1" do
-                      let!(:fired_shot) { player_2.fire_shot(at: player_1) }
+                    describe "fire sub-menu" do
+                      describe "choosing Cancel" do
+                        before do
+                          subject.mock_input(down)
+                          subject.mock_input(enter)
+                        end
 
-                      before do
-                        allow(subject).to receive(:new_fired_shot) { fired_shot }
+                        it "reverts to original turn menu" do
+                          expect(subject.current_screen).to eq :turn
+                        end
+
+                        it "maintains turns left" do
+                          expect(subject.current_player.turns_left).to eq 2
+                        end
                       end
 
-                      it "hits Player 1" do
-                        allow(fired_shot).to receive(:successfully_hit?) { true }
-                        subject.mock_input(enter)
-                        expect(fired_shot.current_position).to eq player_1.current_position
-                        expect(player_1.health).to be < 100
-                        expect(subject.current_screen).to eq :turn
-                        expect(subject.current_player.turns_left).to eq 1
-                      end
+                      describe "choosing Player 1" do
+                        let!(:fired_shot) { player_2.fire_shot(at: player_1) }
 
-                      it "misses Player 1" do
-                        allow(fired_shot).to receive(:successfully_hit?) { false }
-                        subject.mock_input(enter)
-                        expect(fired_shot.current_position)
-                          .to eq player_1.current_position
-                        expect(player_1.health).to eq 100
-                        expect(subject.current_screen).to eq :turn
-                        expect(subject.current_player.turns_left).to eq 1
+                        before do
+                          allow(subject).to receive(:new_fired_shot) { fired_shot }
+                        end
+
+                        it "hits Player 1" do
+                          allow(fired_shot).to receive(:successfully_hit?) { true }
+                          subject.mock_input(enter)
+                          expect(fired_shot.current_position).to eq player_1.current_position
+                          expect(player_1.health).to be < 100
+                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_player.turns_left).to eq 1
+                        end
+
+                        it "misses Player 1" do
+                          allow(fired_shot).to receive(:successfully_hit?) { false }
+                          subject.mock_input(enter)
+                          expect(fired_shot.current_position)
+                            .to eq player_1.current_position
+                          expect(player_1.health).to eq 100
+                          expect(subject.current_screen).to eq :turn
+                          expect(subject.current_player.turns_left).to eq 1
+                        end
                       end
                     end
                   end

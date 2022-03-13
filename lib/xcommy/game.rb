@@ -24,7 +24,7 @@ module Xcommy
     end
 
     def networking?
-      @network != nil
+      @players.any?(&:from_network_client?)
     end
 
     def other_players
@@ -58,12 +58,26 @@ module Xcommy
 
     private
 
+    def local_players
+      @players.select(&:from_local_client?)
+    end
+
+    def after_turn_screen_type
+      return :game_over if over?
+
+      if local_players.include?(@current_player)
+        # change this screen_type to be `new_turn`. Or `select_turn`.  It
+        # is confusing with the Turn model now.
+        :turn
+      else
+        :waiting
+      end
+    end
+
     def render(screen_type)
       if Turn.types.include?(screen_type.to_sym)
         generate_turn!(screen_type)
-        # change this screen_type to be `new_turn`. Or `select_turn`.  It
-        # is confusing with the Turn model now.
-        screen_type = over? ? :game_over : :turn
+        screen_type = after_turn_screen_type
       end
 
       Screen.new(self).render(screen_type)
