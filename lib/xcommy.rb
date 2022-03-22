@@ -15,6 +15,7 @@ require_relative "xcommy/user_interface"
 require_relative "xcommy/screen"
 require_relative "xcommy/cinematic_scene"
 require_relative "xcommy/turn"
+require_relative "xcommy/server"
 
 module Xcommy
   class Error < StandardError; end

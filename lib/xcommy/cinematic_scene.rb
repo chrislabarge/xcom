@@ -10,7 +10,7 @@ module Xcommy
 
     def self.render(turn)
       instance = new(turn.game)
-      case turn.type
+      case turn.type.to_sym
       when :move_to
         instance.move_to(turn.position)
       when :hit

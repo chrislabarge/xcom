@@ -8,7 +8,7 @@ module Xcommy
     end
 
     def from_network_client?
-      !@from_local_client
+      !from_local_client?
     end
 
     def from_local_client?

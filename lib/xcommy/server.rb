@@ -5,18 +5,25 @@ require_relative 'turn'
 
 module Xcommy
   class Server
+    attr_accessor :turns
+
     def initialize
       @turns = []
     end
 
-    def run
-      server = TCPServer.new("localhost", 8080)
+    def url
+      "localhost:8080"
+    end
 
-      loop do
-        client = server.accept
+    def run
+      @tcp_server = TCPServer.new("localhost", 8080)
+
+      while true do
+        client = @tcp_server.accept
         request = client.readpartial(2048)
 
         client.write(generate_response(request))
+        #@tcp_server.shutdown if exit
       end
     end
 
@@ -26,31 +33,41 @@ module Xcommy
       request_data = parse_request(request)
       uri = URI.parse(request_data[:path])
 
-      if uri.query
+      if request_data[:method] == "POST"
+        params = CGI::parse(request.lines.last)
+
+        return response("ok") if params["id"].nil?
+
+        @turns << Turn.new(resource_params(params))
+      else
         params = CGI::parse(uri.query)
 
-        if request_data[:method] == "POST"
-          @turns << Turn.new(resource_params(params))
-        else
-          turn_id = params["id"].last&.to_i
-          unless @turns.map(&:id).include?(turn_id)
-            return response("Waiting")
-          end
-        end
+        return response("ok") if params["id"].nil?
 
-        content = @turns.last.to_json
+        turn_id = params["id"].last&.to_i
+
+        unless turns.map(&:id).include?(turn_id.to_i)
+          return response("Waiting", code: 204)
+        end
       end
 
-      response(content)
+      response(@turns.last.to_json)
     end
 
     def resource_params(data)
-      {
+      content = {
         id: data["id"].last.to_i,
-        player_index: data["player_index"].last.to_i,
-        type: data["type"].last.to_sym,
-        position: [data["position_y"].last.to_i, data["position_x"].last.to_i],
+        type: data["type"].last&.to_sym,
       }
+
+      if data["player_index"].last.nil?
+        content[:position] =
+          [data["position_y"].last.to_i, data["position_x"].last.to_i]
+      else
+        content[:player_index] = data["player_index"].last.to_i
+      end
+
+      content
     end
 
     def parse_request(request)
@@ -68,6 +85,4 @@ module Xcommy
         "#{content}\r\n"
     end
   end
-
-  Server.new.run
 end

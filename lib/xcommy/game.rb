@@ -11,7 +11,8 @@ module Xcommy
                   :fired_shot,
                   :hit_damage,
                   :board,
-                  :user_interface
+                  :user_interface,
+                  :server
 
     def initialize
       @cover = []
@@ -21,6 +22,14 @@ module Xcommy
       @user_interface = UserInterface.new self
       @fired_shot = nil
       @hit_damage = 10
+    end
+
+    def server_url
+      @server.url
+    end
+
+    def next_turn_id
+      (@last_turn&.id || 0) + 1
     end
 
     def networking?
@@ -40,9 +49,17 @@ module Xcommy
       @current_player = @players.first
     end
 
+    def start_server!
+      @server = Server.new
+      Process.fork do
+        @server.run
+      end
+    end
+
     def start
       @board.refresh!
       @current_player = @players.first
+
       render(:new_turn)
 
       unless Setup.testing?
@@ -79,6 +96,26 @@ module Xcommy
       end
 
       Screen.new(self).render(screen_type)
+
+      if screen_type == :waiting
+        next_turn = Turn.find(next_turn_id, self)
+
+        # This is just for testing purposes right now
+        # allows testing current state of the test game
+        return if next_turn == nil && ENV["TESTING"] == "true"
+
+        while next_turn == nil
+          next_turn = Turn.find(next_turn_id, server_url)
+          # this sleep prevents requesting turn from server to often
+          sleep(2)
+        end
+
+        save_turn! next_turn
+
+        unless local_players.include?(@current_player)
+          render(:waiting)
+        end
+      end
     end
 
     def over?
@@ -124,9 +161,19 @@ module Xcommy
       end
 
       if turn.successful?
-        CinematicScene.render(turn)
-        take_turn!
-        @last_turn = turn
+        save_turn! turn
+      end
+    end
+
+    def save_turn!(turn)
+      CinematicScene.render(turn)
+      @last_turn = turn
+
+      @current_player.turns_left -= 1
+
+      if @current_player.turns_left.zero?
+        @current_player = next_player
+        @current_player.reset_turns_left!
       end
     end
 
@@ -136,15 +183,6 @@ module Xcommy
 
     def next_player
       players[-(players.index(@current_player) + 1)]
-    end
-
-    def take_turn!
-      @current_player.turns_left -= 1
-
-      if @current_player.turns_left.zero?
-        @current_player = next_player
-        @current_player.reset_turns_left!
-      end
     end
 
     # what accepting a current screen allows for is to keep track of state

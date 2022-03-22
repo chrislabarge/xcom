@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "support/input_helper.rb"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -14,4 +15,5 @@ end
 
 # NOTE: This require has to be below the configuration as I immediately fire up
 # a game right now.
+
 require "xcommy"
