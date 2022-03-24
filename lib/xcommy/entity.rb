@@ -4,7 +4,6 @@ module Xcommy
                   :current_destination,
                   :current_position,
                   :is_visible,
-                  :damage_amount,
                   :miss
 
     def initialize(game, starting_position)
@@ -14,7 +13,6 @@ module Xcommy
 
     def respawn!(starting_position)
       @health = 100
-      @damage_amount = 0
       @current_position = starting_position
       show!
     end
@@ -45,22 +43,6 @@ module Xcommy
 
     def visible?
       @is_visible == true
-    end
-
-    def hit!
-      @damage_amount = @game.hit_damage
-    end
-
-    def miss!
-      @miss = true
-    end
-
-    def reset_miss!
-      @miss = false
-    end
-
-    def reset_hit!
-      @damage_amount = 0
     end
 
     def damaged?

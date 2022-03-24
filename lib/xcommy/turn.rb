@@ -4,17 +4,18 @@ require "net/http"
 
 module Xcommy
   class Turn
-    attr_accessor :player_index, :type, :position, :id, :game
+    attr_accessor :player_index, :type, :position, :id, :game, :damage
 
     def self.types
       [:move_to, :player_2, :player_1, :hit, :miss]
     end
 
-    def initialize(type: nil, player_index: nil, id: nil, position: nil, game: nil)
+    def initialize(type: nil, player_index: nil, id: nil, position: nil, game: nil, damage: nil)
       @id = id
       @type = type&.to_sym
       @player_index = player_index
       @game = game
+      @damage = damage
       @position = position || find_position
     end
 
@@ -51,7 +52,8 @@ module Xcommy
         id: id,
         type: @type,
         player_index: @player_index,
-        position: @position
+        damage: @damage,
+        position: @position,
       }
     end
 
@@ -90,6 +92,10 @@ module Xcommy
       else
         content["position_y"] = @position[0].to_s
         content["position_x"] = @position[1].to_s
+      end
+
+      if @type.to_sym == :hit
+        content["damage"] = @damage.to_s
       end
 
       content

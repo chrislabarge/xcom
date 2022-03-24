@@ -95,7 +95,7 @@ RSpec.shared_examples "A Move Turn Type" do |move_to_position|
           end
 
           if subject.networking?
-            expect_server_generated_turn
+            expect_server_generated_turn(id: 2)
           end
         end
       end
@@ -173,8 +173,9 @@ RSpec.shared_examples "A Fire Turn Type" do |move_to_position|
               .to eq other_player.current_position
             expect(other_player.health).to be < 100
             expect(subject.current_screen).to eq next_screen
-            expect(subject.current_player.turns_left).to eq initial_turns_left
-            expect_server_generated_turn if subject.networking?
+            expect(subject.current_player.turns_left).to eq(last_turn? ? 2 : 1)
+
+            expect_server_generated_turn(id: 1) if subject.networking?
           end
         end
       end
@@ -186,8 +187,8 @@ RSpec.shared_examples "A Fire Turn Type" do |move_to_position|
           .to eq other_player.current_position
         expect(other_player.health).to eq 100
         expect(subject.current_screen).to eq next_screen
-        expect(subject.current_player.turns_left).to eq initial_turns_left - 1
-        expect_server_generated_turn if subject.networking?
+        expect(subject.current_player.turns_left).to eq(last_turn? ? 2 : 1)
+        expect_server_generated_turn(id: 1) if subject.networking?
       end
     end
   end
@@ -201,9 +202,8 @@ def last_turn?
   initial_turns_left == 1
 end
 
-def expect_server_generated_turn
+def expect_server_generated_turn(id: nil)
   sleep(3)
   expect(subject.last_turn.data)
-    .to eq Xcommy::Turn.find(1, subject).data
+    .to eq Xcommy::Turn.find(id, subject).data
 end
-

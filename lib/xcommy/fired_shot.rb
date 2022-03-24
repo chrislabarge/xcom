@@ -12,12 +12,7 @@ module Xcommy
     end
 
     def result
-      @result ||= if successfully_hit?
-        @at_player.health -= @game.hit_damage
-        :hit
-      else
-        :miss
-      end
+      @result ||= (successfully_hit? ? :hit : :miss)
     end
 
     def successfully_hit?

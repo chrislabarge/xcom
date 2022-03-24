@@ -26,7 +26,7 @@ module Xcommy
             subject.mock_input(enter)
           end
 
-          it_behaves_like("A Move Turn Type", [8, 0], true)
+          it_behaves_like("A Move Turn Type", [8, 0])
         end
 
         describe "FIRE chosen" do
@@ -85,11 +85,90 @@ module Xcommy
         end
 
         it "renders a waiting screen" do
+          subject.start
           expect(subject.current_screen).to eq :waiting
         end
 
-        # this is where I will test all Server responses
+        context 'when no turn has been taken' do
+          before do
+            subject.start
+            sleep(3)
+          end
+
+          it "does not receive turn" do
+            expect(subject.last_turn).to eq nil
+          end
+
+          it "maintains a waiting screen" do
+            expect(subject.current_screen).to eq :waiting
+          end
+        end
+
+        context 'when a move turn has been taken' do
+          let!(:turn) do
+            Turn.new(id: 1, type: :move_to, position: [1, 0], game: subject)
+          end
+
+          before do
+            turn.successful?
+            subject.start
+            sleep(3)
+          end
+
+          it "receives turn" do
+            expect(subject.last_turn.data).to eq turn.data
+          end
+
+          it "updates player 2's position" do
+            expect(player_2.current_position).to eq [1, 0]
+          end
+        end
+
+        context 'when a hit turn has been taken' do
+          let!(:turn) do
+            Turn.new(
+              id: 1,
+              type: :hit,
+              damage: subject.hit_damage,
+              player_index: 0,
+              game: subject
+            )
+          end
+
+          before do
+            turn.successful?
+            subject.start
+            sleep(3)
+          end
+
+          it "receives turn" do
+            expect(subject.last_turn.data).to eq turn.data
+          end
+
+          it "damages player 1's health" do
+            expect(player_1.health).to eq 70
+          end
+        end
+
+        context 'when a miss turn has been taken' do
+          let!(:turn) do
+            Turn.new(id: 1, type: :miss, player_index: 0, game: subject)
+          end
+
+          before do
+            turn.successful?
+            subject.start
+            sleep(3)
+          end
+
+          it "receives turn" do
+            expect(subject.last_turn.data).to eq turn.data
+          end
+        end
       end
+
+      # TODO Verify that when it is 2nd turn, and the turn has been taken,
+      # if renders the proper current_screen (:new_turn), and switches players
     end
   end
 end

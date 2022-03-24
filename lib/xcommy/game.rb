@@ -21,7 +21,7 @@ module Xcommy
       @board = Board.new self
       @user_interface = UserInterface.new self
       @fired_shot = nil
-      @hit_damage = 10
+      @hit_damage = nil
     end
 
     def server_url
@@ -58,9 +58,10 @@ module Xcommy
 
     def start
       @board.refresh!
-      @current_player = @players.first
+      # this ||= is for testing purposes.
+      @current_player ||= @players.first
 
-      render(:new_turn)
+      render(starting_screen)
 
       unless Setup.testing?
         loop do
@@ -74,6 +75,14 @@ module Xcommy
     end
 
     private
+
+    def starting_screen
+      if @current_player.from_local_client?
+        :new_turn
+      else
+        :waiting
+      end
+    end
 
     def local_players
       @players.select(&:from_local_client?)
@@ -112,7 +121,7 @@ module Xcommy
 
         save_turn! next_turn
 
-        unless local_players.include?(@current_player)
+        unless @current_player.from_local_client?
           render(:waiting)
         end
       end
@@ -158,6 +167,9 @@ module Xcommy
         @fired_shot = new_fired_shot
         turn.type = @fired_shot.result
         turn.player_index = other_players.last.index
+        if turn.type.to_sym == :hit
+          turn.damage = @hit_damage
+        end
       end
 
       if turn.successful?
@@ -168,6 +180,12 @@ module Xcommy
     def save_turn!(turn)
       CinematicScene.render(turn)
       @last_turn = turn
+
+      if @last_turn.type.to_sym == :hit
+        player = players[@last_turn.player_index]
+        player.health -= @last_turn.damage
+        player.health = 0 if player.health < 0
+      end
 
       @current_player.turns_left -= 1
 

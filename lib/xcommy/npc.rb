@@ -27,7 +27,7 @@ module Xcommy
     def best_player_to_hit
       @game.players.max_by do |player|
         # I moved this into Fired Shot.. will not longer work.
-        @game.hit_chance_percentage(self, player)
+        @game.fired_shot.hit_chance_percentage(self, player)
       end
     end
 

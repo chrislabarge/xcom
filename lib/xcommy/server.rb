@@ -67,6 +67,10 @@ module Xcommy
         content[:player_index] = data["player_index"].last.to_i
       end
 
+      if content[:type] == :hit
+        content[:damage] = data["damage"].last.to_i
+      end
+
       content
     end
 

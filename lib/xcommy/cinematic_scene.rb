@@ -90,15 +90,9 @@ module Xcommy
       render_blinking_player player, hit_or_miss
 
       2.times do
-        player.send("#{hit_or_miss}!")
         @game.board.refresh!
         Screen.new(@game).render(hit_or_miss)
         short_sleep
-
-        # Sending a "hit" to a entity sort of makes sense
-        # Sending a "miss" to a entity.. is kind of odd.
-        # Why would the entity model need to keep track of a miss
-        player.send("reset_#{hit_or_miss}!")
 
         player.show!
         @game.board.refresh!

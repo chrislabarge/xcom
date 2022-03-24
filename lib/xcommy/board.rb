@@ -182,7 +182,7 @@ module Xcommy
 
         @data[npc_coords[0]][npc_coords[1]] =
           if npc.damaged?
-            "damage_#{npc.damage_amount}"
+            "damage_#{@game.hit_game}"
           elsif npc.missed?
             "miss"
           else

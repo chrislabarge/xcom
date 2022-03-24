@@ -9,6 +9,7 @@ module Xcommy
       game.npcs = []
       game.players = [Player.new(game, [9, 0]), Player.new(game, [0, 0])]
       game.cover = self.class.generate_cover(game)
+      game.hit_damage = 30
       game
     end
 
