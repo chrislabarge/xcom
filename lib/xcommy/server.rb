@@ -23,7 +23,6 @@ module Xcommy
         request = client.readpartial(2048)
 
         client.write(generate_response(request))
-        #@tcp_server.shutdown if exit
       end
     end
 
@@ -40,11 +39,21 @@ module Xcommy
 
         @turns << Turn.new(resource_params(params))
       else
+        if uri.path.include?("start")
+          if @ready_to_play
+            return response("ready")
+          else
+            return response("not", code: 402)
+          end
+        end
+
         params = CGI::parse(uri.query)
 
         return response("ok") if params["id"].nil?
 
         turn_id = params["id"].last&.to_i
+
+        @ready_to_play = true
 
         unless turns.map(&:id).include?(turn_id.to_i)
           return response("Waiting", code: 204)

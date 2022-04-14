@@ -26,8 +26,13 @@ module Xcommy
       content = []
       content << interface_top_border
 
-      content << interface_line
-      content << interface_text_line(current_player.label)
+      if Screen.for_active_session? @game.current_screen
+        content << interface_line
+        content << interface_text_line(current_player.label)
+      else
+        content << interface_line
+        content << interface_text_line("Welcome!")
+      end
 
       if @game.current_screen == :game_over
         content << interface_text_line("WINS!!!")
@@ -37,18 +42,25 @@ module Xcommy
 
       content << interface_divider
 
-      content << interface_text_line("Health")
-      content << interface_text_line(current_player.health.to_s)
+
+      if Screen.for_active_session? @game.current_screen
+        content << interface_text_line("Health")
+        content << interface_text_line(current_player.health.to_s)
+      else
+        content << interface_text_line("Start Screen")
+        content << interface_line
+      end
+
       content << interface_divider
 
       content << interface_text_line(screen_title)
 
-      if @game.current_screen == :game_over
-        content << interface_line
-        content << interface_line
-      else
+      if Screen.for_turn? @game.current_screen
         content << interface_text_line("Turn")
         content << interface_text_line(turn_display)
+      else
+        content << interface_line
+        content << interface_line
       end
 
       @menu.items.each do |menu_item|
@@ -76,6 +88,10 @@ module Xcommy
       case @game.current_screen
       when :new_turn
         "Choose Action"
+      when :network_url
+        "Send Network URL"
+      when :network_waiting
+        "Network Waiting..."
       when :game_over
         "Choose To"
       when :move_to
@@ -86,6 +102,8 @@ module Xcommy
         "Waiting..."
       when :spot
         "Spot Selected"
+      when :start_menu
+        "Choose Game Type"
       when :fire
         "Select Player"
       when :firing

@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Chris LaBarge"]
   spec.email         = ["chrislabargedev@gmail.com"]
 
-  spec.summary       = "xcom clone"
-  spec.description   = "command line xcom clone"
-  spec.homepage      = "https://www.xcommy.com"
+  spec.summary       = "x-com clone"
+  spec.description   = "command line x-com clone"
+  spec.homepage      = "https://github.com/chrislabarge/xcom"
   spec.license       = "MIT"
 
   #spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"

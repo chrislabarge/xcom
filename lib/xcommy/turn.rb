@@ -1,6 +1,5 @@
 require "json"
-require "uri"
-require "net/http"
+require "http"
 
 module Xcommy
   class Turn
@@ -34,11 +33,9 @@ module Xcommy
     end
 
     def self.find(id, game)
-      response = Net::HTTP.get_response(
-        URI("#{base_url(game)}/turns?id=#{id}"),
-      )
+      response = HTTP.get("#{game.base_url}/turns?id=#{id}")
 
-      unless response.code == no_content_code
+      unless response.code.to_s == no_content_code
         new(params_from_json(response.body).merge(game: game))
       end
     end
@@ -72,10 +69,9 @@ module Xcommy
     end
 
     def generate_on_server!
-      uri = URI("#{base_url}/turns/new")
+      response = HTTP.post("#{@game.base_url}/turns/new", form: post_params)
 
-      response = Net::HTTP.post_form(uri, post_params)
-      unless response.is_a?(Net::HTTPSuccess)
+      unless response.status.success?
         sleep(1)
         generate_on_server!
       end
@@ -99,14 +95,6 @@ module Xcommy
       end
 
       content
-    end
-
-    def base_url
-      self.class.base_url @game
-    end
-
-    def self.base_url(game)
-      "http://#{game.server_url}"
     end
 
     def self.no_content_code

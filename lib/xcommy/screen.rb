@@ -7,7 +7,20 @@ module Xcommy
 
     def render(screen_type)
       set_current_screen_type screen_type
+
       puts content
+    end
+
+    def self.for_turn?(screen_type)
+      ![:game_over, :start_menu, :network_url, :network_waiting].include? screen_type
+    end
+
+    def self.for_active_session?(screen_type)
+      ![:start_menu, :network_url, :network_waiting].include? screen_type
+    end
+
+    def self.for_waiting_to_start?(screen_type)
+      [:network_url, :network_waiting].include? screen_type
     end
 
     private
@@ -29,7 +42,15 @@ module Xcommy
 
     def set_current_screen_type(screen_type)
       type = screen_type.to_sym
-      type = :new_turn if type == :cancel
+
+      if type == :cancel
+        if Screen.for_active_session? @game.current_screen
+          type = :new_turn
+        else
+          type = :start_menu
+        end
+      end
+
       @game.current_screen = type
     end
 

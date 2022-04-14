@@ -29,6 +29,12 @@ module Xcommy
 
     def items
       case @game.current_screen
+      when :start_menu
+        ["Local", "Network", "Exit"]
+      when :network_url
+        ["Sent", "Cancel"]
+      when :network_waiting
+        ["Waiting", "Cancel"]
       when :spot
         ["Move To", "Cancel"]
       when :move_to
@@ -66,7 +72,13 @@ module Xcommy
     end
 
     def item_key(str)
-      if str.include?("player_1")
+      if str.include?("network")
+        :network_url
+      elsif str.include?("local")
+        :new_turn
+      elsif str.include?("sent")
+        :network_waiting
+      elsif str.include?("player_1")
         :player_1
       elsif str.include?("player_2")
         :player_2

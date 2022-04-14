@@ -1,3 +1,4 @@
+require_relative "xcommy/utilities"
 require_relative "xcommy/version"
 require_relative "xcommy/board"
 require_relative "xcommy/game"
@@ -19,5 +20,7 @@ require_relative "xcommy/server"
 
 module Xcommy
   class Error < StandardError; end
-  Setup.new_game.start unless Setup.testing?
+  server_url = ARGV.first
+
+  Setup.new(server_url: server_url).start unless Setup.testing?
 end

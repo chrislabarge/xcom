@@ -1,7 +1,10 @@
 require 'io/console'
+require "http"
 
 module Xcommy
   class Game
+    include Utilities
+
     attr_accessor :cover,
                   :npcs,
                   :players,
@@ -14,6 +17,8 @@ module Xcommy
                   :user_interface,
                   :server
 
+    attr_writer :server_url
+
     def initialize
       @cover = []
       @npcs = []
@@ -25,7 +30,7 @@ module Xcommy
     end
 
     def server_url
-      @server.url
+      @server_url || @server.url
     end
 
     def next_turn_id
@@ -51,17 +56,43 @@ module Xcommy
 
     def start_server!
       @server = Server.new
-      Process.fork do
+
+      @server_pid = Process.fork do
         @server.run
       end
     end
 
-    def start
+    def stop!
+      Process.kill("HUP", @server_pid) if @server
+
+      exit
+    end
+
+    def start_polling!
+      Thread.new do
+        response = nil
+
+        while !response&.status&.success? do
+          response = HTTP.get("#{base_url}/start")
+          sleep(2)
+        end
+
+
+        render(:new_turn)
+      end
+    end
+
+    def base_url
+      "http://#{server_url}"
+    end
+
+    def start(screen_type)
       @board.refresh!
+
       # this ||= is for testing purposes.
       @current_player ||= @players.first
 
-      render(starting_screen)
+      render screen_type
 
       unless Setup.testing?
         loop do
@@ -75,14 +106,6 @@ module Xcommy
     end
 
     private
-
-    def starting_screen
-      if @current_player.from_local_client?
-        :new_turn
-      else
-        :waiting
-      end
-    end
 
     def local_players
       @players.select(&:from_local_client?)
@@ -98,52 +121,8 @@ module Xcommy
       end
     end
 
-    def render(screen_type)
-      if Turn.types.include?(screen_type.to_sym)
-        generate_turn!(screen_type)
-        screen_type = after_turn_screen_type
-      end
-
-      Screen.new(self).render(screen_type)
-
-      if screen_type == :waiting
-        next_turn = Turn.find(next_turn_id, self)
-
-        # This is just for testing purposes right now
-        # allows testing current state of the test game
-        return if next_turn == nil && ENV["TESTING"] == "true"
-
-        while next_turn == nil
-          next_turn = Turn.find(next_turn_id, server_url)
-          # this sleep prevents requesting turn from server to often
-          sleep(2)
-        end
-
-        save_turn! next_turn
-
-        unless @current_player.from_local_client?
-          render(:waiting)
-        end
-      end
-    end
-
     def over?
       !players.all?(&:alive?)
-    end
-
-    def current_selection
-      if @current_screen == :move
-        spot_screen
-      else
-        option = @user_interface.menu.current_selection
-
-        unless Turn.types.include?(option)
-          @board.show_cursor!
-          @user_interface.menu.cursor.move_to_top!
-        end
-
-        option
-      end
     end
 
     def spot_screen
@@ -201,45 +180,6 @@ module Xcommy
 
     def next_player
       players[-(players.index(@current_player) + 1)]
-    end
-
-    # what accepting a current screen allows for is to keep track of state
-    # I think what I should be doing instead is the opposite. Just re-render
-    # by default and "refresh" what input is selected/entered by the user
-    def accept_input(input = STDIN.getch)
-      next_screen = nil
-      case input
-      when "j"
-        change_cursor_position(:down)
-      when "k"
-        change_cursor_position(:up)
-      when "h"
-        change_cursor_position(:left)
-      when "l"
-        change_cursor_position(:right)
-      when "\r"
-        @user_interface.menu.select_highlighted_item!
-        if @user_interface.menu.exit_currently_selected?
-          exit
-        else
-          next_screen = current_selection.downcase.to_sym
-        end
-      when "c"
-        exit
-      end
-      next_screen || @current_screen
-    end
-
-    def change_cursor_position(direction)
-      if @current_screen == :move
-        @board.cursor.move_in direction
-      else
-        @user_interface.menu.cursor.move_in direction
-      end
-
-      if @current_screen == :fire
-        @board.toggle_static_cursor
-      end
     end
   end
 end
