@@ -17,16 +17,16 @@ module Xcommy
                   :user_interface,
                   :server
 
-    attr_writer :server_url
-
-    def initialize
+    def initialize(server_url: nil)
       @cover = []
       @npcs = []
       @players = []
       @board = Board.new self
+      @board.refresh!
       @user_interface = UserInterface.new self
       @fired_shot = nil
-      @hit_damage = nil
+      @server_url = server_url
+      @hit_damage = 30
     end
 
     def server_url
@@ -47,7 +47,7 @@ module Xcommy
 
     def restart!
       @npcs = []
-      @cover = Setup.generate_cover(self)
+      @cover = generate_cover
       @players[0].respawn!([9, 0])
       @players[1].respawn!([0, 0])
       @board.refresh!
@@ -68,30 +68,54 @@ module Xcommy
       exit
     end
 
-    def start_polling!
-      Thread.new do
-        response = nil
-
-        while !response&.status&.success? do
-          response = HTTP.get("#{base_url}/start")
-          sleep(2)
-        end
-
-        @user_interface.menu.cursor.move_to_top!
-
-        render(:new_turn)
-      end
-    end
-
     def base_url
       "http://#{server_url}"
     end
 
+    def setup!
+      start starting_screen
+    end
+
+    private
+
+    def starting_screen
+      @server_url.nil? ? screen_from_selected_game_type : :waiting
+    end
+
+    def screen_from_selected_game_type
+      render(:start_menu)
+      next_screen = nil
+
+      loop do
+        next_screen = accept_input
+
+        if [:new_turn, :network_url].include? next_screen
+          return next_screen
+        else
+          render next_screen
+        end
+      end
+    end
+
     def start(screen_type)
-      @board.refresh!
+      @players = [
+        Player.new(self, [9, 0]),
+        Player.new(self, [0, 0])
+      ]
+      @cover = generate_cover
 
       # this ||= is for testing purposes.
       @current_player ||= @players.first
+      @board.refresh!
+
+      case screen_type
+      when :network_url
+        start_server!
+        @players.last.from_local_client = false
+        start_polling!
+      when :waiting
+        @players.first.from_local_client = false
+      end
 
       render screen_type
 
@@ -101,8 +125,6 @@ module Xcommy
         end
       end
     end
-
-    private
 
     def local_players
       @players.select(&:from_local_client?)
@@ -130,6 +152,21 @@ module Xcommy
       else
         @user_interface.alert_message = "Spot not available"
         :move
+      end
+    end
+
+    def start_polling!
+      Thread.new do
+        response = nil
+
+        while !response&.status&.success? do
+          response = HTTP.get("#{base_url}/start")
+          sleep(2)
+        end
+
+        @user_interface.menu.cursor.move_to_top!
+
+        render(:new_turn)
       end
     end
 

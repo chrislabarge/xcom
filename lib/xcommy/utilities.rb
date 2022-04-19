@@ -1,5 +1,15 @@
 module Xcommy
   module Utilities
+    def generate_cover
+      coords = []
+
+      coords << [8, 3]
+      coords << [1, 3]
+
+      coords.map do |coord|
+        Cover.new(self, coord, :full_wall)
+      end
+    end
 
     def mock_input(input)
       render accept_input(input)

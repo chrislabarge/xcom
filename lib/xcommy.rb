@@ -7,8 +7,8 @@ require_relative "xcommy/player"
 require_relative "xcommy/npc"
 require_relative "xcommy/fired_shot"
 require_relative "xcommy/cover"
-require_relative "xcommy/setup"
 require_relative "xcommy/spot"
+require_relative "xcommy/setup"
 require_relative "xcommy/menu"
 require_relative "xcommy/menu_cursor"
 require_relative "xcommy/board_cursor"
@@ -20,7 +20,8 @@ require_relative "xcommy/server"
 
 module Xcommy
   class Error < StandardError; end
+
   server_url = ARGV.first
 
-  Setup.new(server_url: server_url).start unless Setup.testing?
+  Game.new(server_url: server_url).setup! unless Setup.testing?
 end

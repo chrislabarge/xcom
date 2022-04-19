@@ -1,6 +1,6 @@
 module Xcommy
   class Player < Entity
-    attr_writer :turns_left
+    attr_writer :turns_left, :from_local_client
 
     def initialize(game, starting_position, from_local_client: true)
       super(game, starting_position)
