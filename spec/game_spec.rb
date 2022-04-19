@@ -4,10 +4,11 @@ module Xcommy
   RSpec.describe Game do
     include InputHelper
 
-    subject! { Setup.new_game }
+    let!(:setup) { Setup.new }
 
-    before do
-      subject.start
+    subject! do
+      setup.start
+      setup.game
     end
 
     it "begins with a start menu screen" do
@@ -16,7 +17,7 @@ module Xcommy
 
     context "when choosing 'Local' play" do
       before do
-        subject.mock_input(enter)
+        setup.mock_input(enter)
       end
 
       let!(:player_1) { subject.players[0] }
@@ -28,7 +29,7 @@ module Xcommy
       end
 
       it "begins with player 1 taking a turn" do
-        expect(subject.current_player).to eq subject.players.first
+        expect(subject.current_player).to eq player_1
       end
 
       # This one is currently failing due to my changes
@@ -39,8 +40,8 @@ module Xcommy
 
     context "when choosing 'Network' play" do
       before do
-        subject.mock_input(down)
-        subject.mock_input(enter)
+        setup.mock_input(down)
+        setup.mock_input(enter)
       end
 
       # This will act as a URL presenter and wait screen until other player
@@ -55,17 +56,17 @@ module Xcommy
 
       context "when choosing 'Sent'" do
         before do
-          subject.mock_input(enter)
+          setup.mock_input(enter)
         end
 
         it "renders network waiting screen" do
           expect(subject.current_screen).to eq :network_waiting
         end
 
-        context "when choosing 'Cancel'"do
+        context "when choosing 'Cancel'" do
           before do
-            subject.mock_input(down)
-            subject.mock_input(enter)
+            setup.mock_input(down)
+            setup.mock_input(enter)
           end
 
           it "renders the start screen" do

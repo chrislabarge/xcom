@@ -30,7 +30,7 @@ module Xcommy
     end
 
     def server_url
-      @server_url || @server.url
+      @server_url || @server&.url
     end
 
     def next_turn_id
@@ -77,6 +77,7 @@ module Xcommy
           sleep(2)
         end
 
+        @user_interface.menu.cursor.move_to_top!
 
         render(:new_turn)
       end
@@ -99,10 +100,6 @@ module Xcommy
           render accept_input
         end
       end
-    end
-
-    def mock_input(input)
-      render accept_input(input)
     end
 
     private

@@ -58,6 +58,9 @@ module Xcommy
       if Screen.for_turn? @game.current_screen
         content << interface_text_line("Turn")
         content << interface_text_line(turn_display)
+      elsif Screen.for_waiting_to_start? @game.current_screen
+        content << interface_text_line(@game.server_url)
+        content << interface_line
       else
         content << interface_line
         content << interface_line
@@ -134,6 +137,7 @@ module Xcommy
     end
 
     def interface_text_line(text, cursor: false)
+      text = text.to_s
       if !text.length.even?
         text = even_adjustment(text)
       end

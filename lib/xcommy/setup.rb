@@ -2,7 +2,7 @@ module Xcommy
   class Setup
     include Utilities
 
-    attr_accessor :board, :current_screen, :user_interface
+    attr_accessor :board, :current_screen, :user_interface, :game
 
     def initialize(server_url: nil)
       @game = Game.new
@@ -22,6 +22,7 @@ module Xcommy
     def start
       @game.current_screen = :start_menu
 
+      # this is the setup for networked client
       if @server_url.nil?
         render(:start_menu)
       else
@@ -33,6 +34,7 @@ module Xcommy
         @game.start(:waiting)
         return
       end
+
 
       unless Setup.testing?
         next_screen = nil
@@ -64,6 +66,28 @@ module Xcommy
         @game.cover = self.class.generate_cover(@game)
 
         @game.start(next_screen)
+      end
+    end
+
+    def mock_input(input)
+      next_screen = accept_input(input)
+      case next_screen
+      when :new_turn
+        @game.players = [
+          Player.new(@game, [9, 0], from_local_client: true),
+          Player.new(@game, [0, 0], from_local_client: true)
+        ]
+        @game.start(next_screen)
+      when :network_url
+        @game.start_server!
+        @game.players = [
+          Player.new(@game, [9, 0], from_local_client: true),
+          Player.new(@game, [0, 0], from_local_client: false)
+        ]
+        @game.start_polling!
+        @game.start(next_screen)
+      else
+        render next_screen
       end
     end
 

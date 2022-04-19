@@ -73,6 +73,9 @@ module Xcommy
 
     def item_key(str)
       if str.include?("network")
+        # TODO - come up with a "new menu" Screen callback, to handle the
+        # #move_to_top! cursor stuff.
+        @cursor.move_to_top!
         :network_url
       elsif str.include?("local")
         :new_turn

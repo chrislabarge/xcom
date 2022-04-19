@@ -1,14 +1,34 @@
+require 'curses'
+
 module Xcommy
   class Screen
     def initialize(game)
       @game = game
       @board = @game.board
+      @win = Curses.stdscr
     end
 
     def render(screen_type)
+      @win.clear
+
       set_current_screen_type screen_type
 
-      puts content
+      # TODO - why does content have nested arrays?
+      content.each do |something|
+        if something.is_a? Array
+          something.each do |line|
+            @win << line
+            @win << "\n"
+          end
+        elsif something.is_a? String
+          @win << something
+          @win << "\n"
+        elsif something.is_a? NilClass
+          @win << "\n"
+        end
+      end
+
+      @win.refresh
     end
 
     def self.for_turn?(screen_type)

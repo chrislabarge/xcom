@@ -1,5 +1,10 @@
 module Xcommy
   module Utilities
+
+    def mock_input(input)
+      render accept_input(input)
+    end
+
     # what accepting a current screen allows for is to keep track of state
     # I think what I should be doing instead is the opposite. Just re-render
     # by default and "refresh" what input is selected/entered by the user
@@ -50,7 +55,9 @@ module Xcommy
 
         save_turn! next_turn
 
-        unless @current_player.from_local_client?
+        if @current_player.from_local_client?
+          render(:new_turn)
+        else
           render(:waiting)
         end
       end
