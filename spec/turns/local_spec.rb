@@ -4,12 +4,16 @@ module Xcommy
   RSpec.describe Turn do
     include InputHelper
 
-    subject! { Setup.new_game }
+    subject! do
+      game = Game.new
+      game.send(:start, :new_turn)
+      game
+    end
+
     let!(:player_1) { subject.players[0] }
     let!(:player_2) { subject.players[1] }
 
-    before do
-      subject.start
+    it "designates local player" do
       allow(player_2).to receive(:from_local_client?) { true }
     end
 

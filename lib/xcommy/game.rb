@@ -83,6 +83,9 @@ module Xcommy
     end
 
     def screen_from_selected_game_type
+      # Hack for now
+      return :start_menu if Setup.testing?
+
       render(:start_menu)
       next_screen = nil
 

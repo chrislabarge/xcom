@@ -4,14 +4,18 @@ module Xcommy
   RSpec.describe Turn do
     include InputHelper
 
-    subject! { Setup.new_game }
+    subject! do
+      game = Game.new
+      game.send(:start, :network_url)
+      sleep(2)
+      game
+    end
+
     let!(:player_1) { subject.players[0] }
     let!(:player_2) { subject.players[1] }
 
-    before do
-      subject.start
+    it "designates networked player" do
       allow(player_2).to receive(:from_local_client?) { false }
-      subject.start_server!
     end
 
     describe "Player 1" do
@@ -81,11 +85,12 @@ module Xcommy
     describe "Waiting for networked player" do
       context "when current player is networked" do
         before do
+          allow(subject).to receive(:@server_url) { nil }
           subject.current_player = player_2
         end
 
         it "renders a waiting screen" do
-          subject.start
+          subject.setup!
           expect(subject.current_screen).to eq :waiting
         end
 
