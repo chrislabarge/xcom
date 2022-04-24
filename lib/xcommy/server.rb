@@ -12,11 +12,15 @@ module Xcommy
     end
 
     def url
-      "localhost:8080"
+      "#{ip}:8080"
+    end
+
+    def ip
+      @ip ||= Socket.ip_address_list.detect{|intf| intf.ipv4_private?}.ip_address
     end
 
     def run
-      @tcp_server = TCPServer.new("localhost", 8080)
+      @tcp_server = TCPServer.new(ip, 8080)
 
       while true do
         client = @tcp_server.accept
