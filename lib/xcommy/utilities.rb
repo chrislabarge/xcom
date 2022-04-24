@@ -1,5 +1,20 @@
 module Xcommy
   module Utilities
+    def poll_for_connected_players!
+      Thread.new do
+        response = nil
+
+        while !response&.status&.success? do
+          response = HTTP.get("#{base_url}/start")
+          sleep(2)
+        end
+
+        @user_interface.menu.cursor.move_to_top!
+
+        render(:new_turn)
+      end
+    end
+
     def generate_cover
       coords = []
 
@@ -44,8 +59,8 @@ module Xcommy
 
     def render(screen_type)
       if Turn.types.include?(screen_type.to_sym)
-        generate_turn!(screen_type)
-        screen_type = after_turn_screen_type
+        turn = generate_turn!(screen_type)
+        screen_type = turn.after_create_screen_type
       end
 
       Screen.new(self).render(screen_type)
@@ -73,9 +88,56 @@ module Xcommy
       end
     end
 
+    def change_cursor_position(direction)
+      if @current_screen == :move
+        @board.cursor.move_in direction
+      else
+        @user_interface.menu.cursor.move_in direction
+      end
+
+      if @current_screen == :fire
+        @board.toggle_static_cursor
+      end
+    end
+
+    def server_url
+      @server_url || @server&.url
+    end
+
+    def base_url
+      "http://#{server_url}"
+    end
+
+    private
+
+    def select_board_spot_screen
+      @user_interface.refresh_alert_message!
+
+      if @board.cursor_spot.nil?
+        :spot
+      else
+        @user_interface.alert_message = "Spot not available"
+        :move
+      end
+    end
+
+    def stop!
+      Process.kill("HUP", @server_pid) if @server
+
+      exit
+    end
+
+    def start_server!
+      @server = Server.new
+
+      @server_pid = Process.fork do
+        @server.run
+      end
+    end
+
     def current_selection
       if @current_screen == :move
-        spot_screen
+        select_board_spot_screen
       else
         option = @user_interface.menu.current_selection
 
@@ -86,18 +148,6 @@ module Xcommy
         end
 
         option
-      end
-    end
-
-    def change_cursor_position(direction)
-      if @current_screen == :move
-        @board.cursor.move_in direction
-      else
-        @user_interface.menu.cursor.move_in direction
-      end
-
-      if @current_screen == :fire
-        @board.toggle_static_cursor
       end
     end
   end

@@ -23,5 +23,5 @@ module Xcommy
 
   server_url = ARGV.first
 
-  Game.new(server_url: server_url).setup! unless Setup.testing?
+  Game.new(server_url: server_url).setup_and_start! unless Setup.testing?
 end

@@ -90,7 +90,7 @@ module Xcommy
         end
 
         it "renders a waiting screen" do
-          subject.setup!
+          subject.setup_and_start!
           expect(subject.current_screen).to eq :waiting
         end
 

@@ -29,14 +29,12 @@ module Xcommy
       @hit_damage = 30
     end
 
-    def server_url
-      @server_url || @server&.url
-    end
-
     def next_turn_id
       (@last_turn&.id || 0) + 1
     end
 
+    # TODO - Decide on the best boolean for determining if game is in
+    # network mode
     def networking?
       @players.any?(&:from_network_client?)
     end
@@ -54,35 +52,21 @@ module Xcommy
       @current_player = @players.first
     end
 
-    def start_server!
-      @server = Server.new
-
-      @server_pid = Process.fork do
-        @server.run
-      end
-    end
-
-    def stop!
-      Process.kill("HUP", @server_pid) if @server
-
-      exit
-    end
-
-    def base_url
-      "http://#{server_url}"
-    end
-
-    def setup!
+    def setup_and_start!
       start starting_screen
+    end
+
+    def over?
+      !players.all?(&:alive?)
     end
 
     private
 
     def starting_screen
-      @server_url.nil? ? screen_from_selected_game_type : :waiting
+      @server_url.nil? ? screen_for_selected_game_type : :waiting
     end
 
-    def screen_from_selected_game_type
+    def screen_for_selected_game_type
       # Hack for now
       return :start_menu if Setup.testing?
 
@@ -115,7 +99,7 @@ module Xcommy
       when :network_url
         start_server!
         @players.last.from_local_client = false
-        start_polling!
+        poll_for_connected_players!
       when :waiting
         @players.first.from_local_client = false
       end
@@ -126,50 +110,6 @@ module Xcommy
         loop do
           render accept_input
         end
-      end
-    end
-
-    def local_players
-      @players.select(&:from_local_client?)
-    end
-
-    def after_turn_screen_type
-      return :game_over if over?
-
-      if local_players.include?(@current_player)
-        :new_turn
-      else
-        :waiting
-      end
-    end
-
-    def over?
-      !players.all?(&:alive?)
-    end
-
-    def spot_screen
-      @user_interface.refresh_alert_message!
-
-      if @board.cursor_spot.nil?
-        :spot
-      else
-        @user_interface.alert_message = "Spot not available"
-        :move
-      end
-    end
-
-    def start_polling!
-      Thread.new do
-        response = nil
-
-        while !response&.status&.success? do
-          response = HTTP.get("#{base_url}/start")
-          sleep(2)
-        end
-
-        @user_interface.menu.cursor.move_to_top!
-
-        render(:new_turn)
       end
     end
 
@@ -190,7 +130,10 @@ module Xcommy
 
       if turn.successful?
         save_turn! turn
+        return turn
       end
+
+      nil
     end
 
     def save_turn!(turn)

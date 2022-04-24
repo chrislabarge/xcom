@@ -22,6 +22,16 @@ module Xcommy
       @game.players[player_index]
     end
 
+    def after_create_screen_type
+      return :game_over if @game.over?
+
+      if @game.current_player.from_local_client?
+        :new_turn
+      else
+        :waiting
+      end
+    end
+
     def successful?
       @id = new_id
 

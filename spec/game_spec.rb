@@ -7,7 +7,7 @@ module Xcommy
     subject! { Game.new }
 
     before do
-      subject.setup!
+      subject.setup_and_start!
     end
 
     it "begins with a start menu screen" do
