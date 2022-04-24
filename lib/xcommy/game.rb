@@ -33,8 +33,6 @@ module Xcommy
       (@last_turn&.id || 0) + 1
     end
 
-    # TODO - Decide on the best boolean for determining if game is in
-    # network mode
     def networking?
       @players.any?(&:from_network_client?)
     end
@@ -67,10 +65,10 @@ module Xcommy
     end
 
     def screen_for_selected_game_type
-      # Hack for now
+      render(:start_menu)
+
       return :start_menu if Setup.testing?
 
-      render(:start_menu)
       next_screen = nil
 
       loop do
@@ -85,24 +83,12 @@ module Xcommy
     end
 
     def start(screen_type)
-      @players = [
-        Player.new(self, [9, 0]),
-        Player.new(self, [0, 0])
-      ]
+      @players = generate_players
       @cover = generate_cover
-
-      # this ||= is for testing purposes.
-      @current_player ||= @players.first
+      @current_player = @players.first
       @board.refresh!
 
-      case screen_type
-      when :network_url
-        start_server!
-        @players.last.from_local_client = false
-        poll_for_connected_players!
-      when :waiting
-        @players.first.from_local_client = false
-      end
+      process_network!(screen_type)
 
       render screen_type
 
@@ -130,10 +116,8 @@ module Xcommy
 
       if turn.successful?
         save_turn! turn
-        return turn
+        turn
       end
-
-      nil
     end
 
     def save_turn!(turn)

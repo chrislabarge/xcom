@@ -127,6 +127,24 @@ module Xcommy
       exit
     end
 
+    def process_network!(screen_type)
+      case screen_type
+      when :network_url
+        start_server!
+        @players.last.from_local_client = false
+        poll_for_connected_players!
+      when :waiting
+        @players.first.from_local_client = false
+      end
+    end
+
+    def generate_players
+      [
+        Player.new(self, [9, 0]),
+        Player.new(self, [0, 0]),
+      ]
+    end
+
     def start_server!
       @server = Server.new
 

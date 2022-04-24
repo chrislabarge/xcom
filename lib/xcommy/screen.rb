@@ -5,30 +5,19 @@ module Xcommy
     def initialize(game)
       @game = game
       @board = @game.board
-      @win = Curses.stdscr
+      @window = Curses.stdscr
     end
 
     def render(screen_type)
-      @win.clear
+      @window.clear
 
       set_current_screen_type screen_type
 
-      # TODO - why does content have nested arrays?
-      content.each do |something|
-        if something.is_a? Array
-          something.each do |line|
-            @win << line
-            @win << "\n"
-          end
-        elsif something.is_a? String
-          @win << something
-          @win << "\n"
-        elsif something.is_a? NilClass
-          @win << "\n"
-        end
+      content.each do |line|
+        add_line_to_window(line)
       end
 
-      @win.refresh
+      @window.refresh
     end
 
     def self.for_turn?(screen_type)
@@ -45,6 +34,11 @@ module Xcommy
 
     private
 
+    def add_line_to_window(line = nil)
+      @window << line if line
+      @window << "\n"
+    end
+
     def content
       screen_lines = []
 
@@ -57,7 +51,7 @@ module Xcommy
       screen_lines << blank_line
       screen_lines << boarder_horizontal
       screen_lines << blank_line
-      screen_lines
+      screen_lines.flatten
     end
 
     def set_current_screen_type(screen_type)
